@@ -1,0 +1,1124 @@
+{
+ "npcs": [
+  {
+   "name": "Captain Samuel Ord",
+   "hash": "#tccC3iR2NKeONqopRsaEdgK",
+   "extends": "NPC Profile",
+   "profile": {
+    "epithet": "Human Veteran",
+    "traits": [
+     "Patient",
+     "Dutiful",
+     "Overwhelmed"
+    ],
+    "description": "Samuel Ord is a veteran of numerous Freyish battles prior to the unification of the Empire. He had hoped that, with the end of the war, the horrors would cease. He was wrong.\n\nHe and his troops were dispatched to Mikko one week ago, and nothing has gone right since. None of his standard tactics are working; his men are panicking, his most trusted Sergeant is missing, to say nothing of the nightmares."
+   },
+   "statblock": null,
+   "features": []
+  },
+  {
+   "name": "Wynota (Former Half-Elf Nighthawk)",
+   "hash": "#tzhTgmS9MVAEWOgDVJ8kaAz",
+   "extends": "NPC Profile",
+   "profile": {
+    "epithet": "Former Half-Elf Nighthawk",
+    "traits": [
+     "Sarcastic",
+     "Surly",
+     "Haunted",
+     "Determined"
+    ],
+    "description": "Wynota was once a Nighthawk, one of the special forces fielded by the Empire to ensure the safety and cooperation of the vampiric residents of Axis.\n\nAfter the death of her vampiric ward, Wynota lost her faith in the veiled mother and moved to Mikko. As the world begins to spiral into darkness and chaos, however, she feels compelled to render whatever aid she can."
+   },
+   "statblock": null,
+   "features": [],
+   "linked_to": "#tZl1z5jZTWVZQuaDct5nvKC"
+  },
+  {
+   "name": "Wynota",
+   "hash": "#tZl1z5jZTWVZQuaDct5nvKC",
+   "extends": "Monster",
+   "profile": null,
+   "statblock": {
+    "Name": "Wynota",
+    "Printed Type Line": "Medium Half-Elf Rogue",
+    "Size": "Medium",
+    "Type": "Half-Elf Rogue",
+    "Armor Class": "16",
+    "Armor Class Note": "Studded Leather",
+    "Hit Points": "52",
+    "Hit Dice": "8d8 + 16",
+    "Experience Points": "1800",
+    "Proficiency Bonus": "3"
+   },
+   "features": [
+    {
+     "name": "Evasion",
+     "category": "Trait",
+     "description": "When Wynota is subjected to an effect that allows her to make a Dexterity saving throw to take only half damage, she instead takes no damage if she succeeds on the saving throw, and only half damage if she fails."
+    },
+    {
+     "name": "Nighthawk Training",
+     "category": "Trait",
+     "description": "Gains advantage on checks relating to her duties as a Nighthawk (warfare, investigation, etc)."
+    },
+    {
+     "name": "Sneak Attack (1/Turn)",
+     "category": "Trait",
+     "description": "Wynota deals an extra 17 (5d6) damage when she hits a target with a weapon attack and has advantage on the attack roll, or when the target is within 5 feet of an ally of Wynota that isn’t incapacitated and Wynota doesn’t have disadvantage on the attack roll."
+    },
+    {
+     "name": "Silver Dagger",
+     "category": "Action",
+     "description": "*Melee Weapon Attack:* +7 to hit, reach 5 ft., one creature. *Hit:* 7 (1d6 + 4) piercing damage."
+    },
+    {
+     "name": "Two Weapon Fighting - Silver Dagger",
+     "category": "Bonus Action",
+     "description": "*Melee Weapon Attack:* +7 to hit, reach 5 ft., one creature. *Hit:* 7 (1d6) piercing damage."
+    },
+    {
+     "name": "Cunning Action",
+     "category": "Bonus Action",
+     "description": "On each of her turns, Wynota can use a bonus action to take the Dash, Disengage, or Hide action."
+    },
+    {
+     "name": "Uncanny Dodge",
+     "category": "Reaction",
+     "description": "When an attacker Wynota can see hits her with an attack, she can use her reaction to halve the attack's damage."
+    }
+   ]
+  },
+  {
+   "name": "Adam Taylor (Loving Father)",
+   "hash": "#tvYr7baCms0wwSq2MNgGi6F",
+   "extends": "NPC Profile",
+   "profile": {
+    "epithet": "Loving Father",
+    "traits": [
+     "Patient",
+     "Precise",
+     "Understanding"
+    ],
+    "description": "Adam works leather for a living, making straps and repairing the armor of the foresters who make up the majority of the town’s population. He is known as a capable craftsman who is prone to doting on his young daughter.\n\nHe and his wife, Nikki, are widely respected by the townsfolk of Mikko. They are occasionally used as examples of proper neighborly behavior under the Sol Warden’s gaze."
+   },
+   "statblock": null,
+   "features": [],
+   "linked_to": "#t5ICelx3fsVRG6EFdLdvN9w"
+  },
+  {
+   "name": "Adam Taylor, Possessed",
+   "hash": "#tPhHE00jYYOIEHWYM6amkrM",
+   "extends": "NPC Profile",
+   "profile": {
+    "epithet": "Zealous Crusader",
+    "traits": [
+     "Manic",
+     "Marked",
+     "Fervent"
+    ],
+    "description": "Now that he has been possessed by the forces of Orcus, the creature wearing Adam’s skin is a bundle of pseudo-religious zeal. The settling of power within his physical form has rendered him easily overwhelmed by sound and light.\n\nHis is a frantic zeal, waiting for the moment he is unleashed to fulfil his dark purpose.\n\nSee the Enemies section for more details."
+   },
+   "statblock": null,
+   "features": [],
+   "linked_to": "#t5ICelx3fsVRG6EFdLdvN9w"
+  },
+  {
+   "name": "Adam Taylor",
+   "hash": "#t5ICelx3fsVRG6EFdLdvN9w",
+   "extends": "Monster",
+   "profile": null,
+   "statblock": {
+    "Name": "Adam Taylor",
+    "Printed Type Line": "Medium Humanoid (Human), Neutral Evil",
+    "Size": "Medium",
+    "Type": "Humanoid (Human)",
+    "Alignment": "Neutral Evil",
+    "Armor Class": "14",
+    "Armor Class Note": "natural armor",
+    "Hit Points": "77",
+    "Hit Dice": "13d10 + 26",
+    "Damage Resistances": [
+     "Necrotic",
+     "Bludgeoning, Piercing, and Slashing from Nonmagical Attacks"
+    ],
+    "Condition Immunities": [
+     "Charmed",
+     "Frightened"
+    ],
+    "Experience Points": "8400",
+    "Proficiency Bonus": "4"
+   },
+   "features": [
+    {
+     "name": "Legendary Resistance (3/Day)",
+     "category": "Trait",
+     "description": "If Adam fails a saving throw, he can choose to succeed instead."
+    },
+    {
+     "name": "Possessed",
+     "category": "Trait",
+     "description": "Adam is currently possessed by a Shadow Demon."
+    },
+    {
+     "name": "Regeneration",
+     "category": "Trait",
+     "description": "Adam regains 10 hit points at the start of its turn. If he takes fire or radiant damage, this trait doesn’t function at the start of his next turn. Adam dies only if he starts his turn with 0 hit points and doesn’t regenerate."
+    },
+    {
+     "name": "Silent Fury",
+     "category": "Trait",
+     "description": "If Adam is bloodied (below half health), all melee attacks made by Adam are rolled with advantage. Additionally, all melee attacks made against Adam are rolled with advantage."
+    },
+    {
+     "name": "Multiattack",
+     "category": "Action",
+     "description": "On his turn, Adam may make up to three Sudden Strikes, one of which may instead be a Violent Impact."
+    },
+    {
+     "name": "Sudden Strike",
+     "category": "Action",
+     "description": "*Melee Weapon Attack:* +9 to hit, reach 5 ft., one creature. *Hit:* 13 (2d6 + 6) bludgeoning damage."
+    },
+    {
+     "name": "Violent Impact",
+     "category": "Action",
+     "description": "If Adam moves at least ten feet in a straight line, he may strike his opponent particularly hard. *Melee Weapon Attack:* +9 to hit, reach 5 ft., one creature. *Hit:* 20 (4d6 + 6) bludgeoning damage. A creature hit by Adam in this way must succeed at a DC 17 Strength check or be forcibly moved ahead of Adam to the end of his movement."
+    },
+    {
+     "name": "Sudden Strike (Costs 1 Actions)",
+     "category": "Legendary Action",
+     "description": "Adam uses Sudden Strike."
+    },
+    {
+     "name": "Violent Charge (Costs 2 Actions)",
+     "category": "Legendary Action",
+     "description": "Adam may move his full movement speed, using Violent Impact if able."
+    }
+   ]
+  },
+  {
+   "name": "Nikki Taylor (Loving Mother)",
+   "hash": "#tw6uO3Mcx1QAGGLT7RSQhzM",
+   "extends": "NPC Profile",
+   "profile": {
+    "epithet": "Loving Mother",
+    "traits": [
+     "Knowledgeable",
+     "Caring",
+     "Helpful"
+    ],
+    "description": "Nikki is one of the teachers in Mikko, and she loves her job. Children seem to reciprocate the care she puts into her work, and many a little tyke has gone home beaming because they were on the receiving end of Miss Taylor’s praise.\n\nShe and her husband, Adam, are widely respected by the townsfolk of Mikko. They are occasionally used as examples of proper neighborly behavior under the Sol Warden’s gaze."
+   },
+   "statblock": null,
+   "features": [],
+   "linked_to": "#tX3QLNlyvWfUWk2CibFLiE6"
+  },
+  {
+   "name": "Nikki Taylor, Possessed",
+   "hash": "#tDplbEn7EL1agRGeWyluXBT",
+   "extends": "NPC Profile",
+   "profile": {
+    "epithet": "Priestess of Silence",
+    "traits": [
+     "Cunning",
+     "Arcane",
+     "Fervant"
+    ],
+    "description": "Her specific form of possession has given Nikki incredible arcane powers, though light and touch both can cause her arms to ignite in black flame. She is far more clever than her supposed husband, and she feigns care for her daughter and spouse to lull people into a false sense of empathy.\n\nHer greatest desire is to see her Dread Lord devour this cacophonous world.\n\nSee the Enemies section for more details."
+   },
+   "statblock": null,
+   "features": [],
+   "linked_to": "#tX3QLNlyvWfUWk2CibFLiE6"
+  },
+  {
+   "name": "Nikki Taylor",
+   "hash": "#tX3QLNlyvWfUWk2CibFLiE6",
+   "extends": "Monster",
+   "profile": null,
+   "statblock": {
+    "Name": "Nikki Taylor",
+    "Printed Type Line": "Medium Humanoid (Human), Neutral Evil",
+    "Size": "Medium",
+    "Type": "Humanoid (Human)",
+    "Alignment": "Neutral Evil",
+    "Armor Class": "14",
+    "Armor Class Note": "natural armor",
+    "Hit Points": "88",
+    "Hit Dice": "13d8 + 30",
+    "Damage Resistances": [
+     "Necrotic",
+     "Bludgeoning, Piercing, and Slashing from Nonmagical Attacks"
+    ],
+    "Condition Immunities": [
+     "Charmed",
+     "Exhaustion",
+     "Frightened",
+     "Paralyzed"
+    ],
+    "Experience Points": "8400",
+    "Proficiency Bonus": "4"
+   },
+   "features": [
+    {
+     "name": "Regeneration",
+     "category": "Trait",
+     "description": "Nikki regains 10 hit points at the start of her turn. If she takes fire or radiant damage, this trait doesn’t function at the start of her next turn. She dies only if it starts its turn with 0 hit points and doesn’t regenerate."
+    },
+    {
+     "name": "Possessed",
+     "category": "Trait",
+     "description": "Nikki is currently possessed by a Shadow Demon"
+    },
+    {
+     "name": "Spellcasting",
+     "category": "Trait",
+     "description": "Nikki is a 12th-level spellcaster. Her spellcasting ability is Intelligence (spell save DC 17, +9 to hit with spell attacks). The lich has the following wizard spells prepared:\n\nCantrips (at will): acid splash, chill touch, mage hand, poison spray, prestidigitation\n1st level (4 slots): chromatic orb, ray of sickness\n2nd level (3 slots): Melf’s acid arrow, ray of enfeeblement, spider climb\n3rd level (3 slots): bestow curse, fear, vampiric touch\n4th level (3 slots): blight, Evard’s black tentacles\n5th level (2 slots): cloudkill, insect plague\n6th level (1 slot): circle of death"
+    },
+    {
+     "name": "Dagger",
+     "category": "Action",
+     "description": "*Melee Weapon Attack:* +6 to hit, reach 5 ft., one creature. *Hit:* 5 (1d4 + 3) piercing damage."
+    },
+    {
+     "name": "Cantrip",
+     "category": "Legendary Action",
+     "description": "Nikki casts one of her cantrips."
+    },
+    {
+     "name": "Silence Life (Costs 3 Actions)",
+     "category": "Legendary Action",
+     "description": "Each creature within 30 feet of Nikki must make a DC 17 Constitution saving throw, taking 21 (6d6) necrotic damage on a failed save, or half as much damage on a successful one."
+    }
+   ]
+  },
+  {
+   "name": "Bruce (Treacherous Sergeant)",
+   "hash": "#tNXBtLkAZaoG9vbA4PRFC3C",
+   "extends": "NPC Profile",
+   "profile": {
+    "epithet": "Treacherous Sergeant",
+    "traits": [
+     "Powerful",
+     "Wrathful",
+     "Pious"
+    ],
+    "description": "A veteran of many battles prior to the Unification of the Empire, Bruce was once a gentle soul. His posting here, the Night Things, the whispers in the dark… it’s all proven too much.\n\nHe has sworn himself in service to the Lord of Silence, and has received great power as a result. As a show of his piety, he has flayed his own skull.\n\nSee the Enemies section for more details."
+   },
+   "statblock": null,
+   "features": [],
+   "linked_to": "#tOkQpCyyirkcNggJBhLFEQf"
+  },
+  {
+   "name": "Bruce",
+   "hash": "#tOkQpCyyirkcNggJBhLFEQf",
+   "extends": "Monster",
+   "profile": null,
+   "statblock": {
+    "Name": "Bruce",
+    "Printed Type Line": "Medium Humanoid (Human), Any Alignment",
+    "Size": "Medium",
+    "Type": "Humanoid (Human)",
+    "Alignment": "Any Alignment",
+    "Armor Class": "17",
+    "Armor Class Note": "splint",
+    "Hit Points": "76",
+    "Hit Dice": "9d12 + 18",
+    "Experience Points": "2900",
+    "Proficiency Bonus": "3"
+   },
+   "features": [
+    {
+     "name": "Rage",
+     "category": "Trait",
+     "description": "Bruce can Rage three times, as per the Barbarian class feature."
+    },
+    {
+     "name": "Reckless Attack",
+     "category": "Trait",
+     "description": "When Bruce makes his first attack on his turn, he can decide to attack recklessly. Doing so gives him advantage on melee weapon attack rolls using Strength during this turn, but attack rolls against him have advantage until his next turn."
+    },
+    {
+     "name": "Multiattack",
+     "category": "Action",
+     "description": "Bruce makes two greataxe attacks."
+    },
+    {
+     "name": "Greataxe",
+     "category": "Action",
+     "description": "*Melee Weapon Attack:* +7 to hit, reach 5 ft., one target. *Hit:* 10 (1d12 + 4) slashing damage"
+    },
+    {
+     "name": "Fiendish Smite",
+     "category": "Bonus Action",
+     "description": "After successfully hitting a creature with his greataxe, Bruce may channel the malice of the Lord of Silence through his strike. The creature hit by his strike takes an additional 13 (3d8) necrotic damage, or 18 (4d8) necrotic damage if the target is a Celestial, or a Cleric of another deity. This feature may be used three times per long rest."
+    },
+    {
+     "name": "Frenzied Strike",
+     "category": "Legendary Action",
+     "description": "Bruce makes a single Greataxe attack against a foe within reach."
+    },
+    {
+     "name": "The Silence Advances",
+     "category": "Legendary Action",
+     "description": "Bruce takes a single dash action towards an enemy."
+    }
+   ]
+  },
+  {
+   "name": "Maya Taylor (Foolish Prodigy)",
+   "hash": "#tahszh3CbAJM6scCYvvP9iH",
+   "extends": "NPC Profile",
+   "profile": {
+    "epithet": "Foolish Prodigy",
+    "traits": [
+     "Naive",
+     "Mournful",
+     "Possessed"
+    ],
+    "description": "It all started when the cat died. That’s when Maya started talking to the strange man- the one who stood outside her second floor window. He promised she could bring the cat back. She believed him.\n\nMaya has become a warlock of considerable power, though she doesn’t know how to use it. The spirit possessing her knows how, though, and is all to happy to demonstrate.\n\nSee the Enemies section for more details."
+   },
+   "statblock": null,
+   "features": [],
+   "linked_to": "#tOoD3ESbYAeO1dgx504rhR0"
+  },
+  {
+   "name": "Maya Taylor",
+   "hash": "#tOoD3ESbYAeO1dgx504rhR0",
+   "extends": "Monster",
+   "profile": null,
+   "statblock": {
+    "Name": "Maya Taylor",
+    "Printed Type Line": "Small Humanoid (Human)",
+    "Size": "Small",
+    "Type": "Humanoid (Human)",
+    "Armor Class": "13",
+    "Hit Points": "63",
+    "Hit Dice": "9d8 + 18",
+    "Damage Immunities": [
+     "Fire"
+    ],
+    "Condition Immunities": [
+     "Charmed",
+     "Frightened"
+    ],
+    "Experience Points": "5000",
+    "Proficiency Bonus": "4"
+   },
+   "features": [
+    {
+     "name": "Bloody Fire",
+     "category": "Trait",
+     "description": "The possessing spirit has ignited the soul of Maya's blood on a long-term basis, giving Maya the effects of a permanent boiling blood spell, cast using 4 hit dice. This is the source of her Retributive Flame trait."
+    },
+    {
+     "name": "Possessed",
+     "category": "Trait",
+     "description": "Maya is currently possessed by a specter-of-flame."
+    },
+    {
+     "name": "Skitterer",
+     "category": "Trait",
+     "description": "Maya has a climb speed equal to her walking speed, and can freely move across vertical and inverted surfaces."
+    },
+    {
+     "name": "Retributive Flame",
+     "category": "Trait",
+     "description": "If an enemy within 5 feet of Maya deals either slashing or piercing damage to her, they must attempt a DC 15 Dexterity saving throw. If they fail, they take 4 points of fire damage."
+    },
+    {
+     "name": "Burning Grasp",
+     "category": "Action",
+     "description": "*Melee Weapon Attack:* +6 to hit, reach 5 ft. *Hit:* 10 (4d4) fire damage."
+    },
+    {
+     "name": "Fearful Yowl (Recharge 5-6)",
+     "category": "Action",
+     "description": "Creatures within 20 feet of Maya must succeed at a DC 15 Wisdom Saving throw or gain the frightened condition. Creatures frightened this way must use their next reaction to move their full movement speed directly away from Maya, if able."
+    }
+   ]
+  },
+  {
+   "name": "The Howling Silence (Emissary of the Dead Lord)",
+   "hash": "#tZSlTYBE9aYHwCPvpfBz6rP",
+   "extends": "NPC Profile",
+   "profile": {
+    "epithet": "Emissary of the Dead Lord",
+    "traits": [
+     "Cunning",
+     "Terrifying",
+     "Subservient"
+    ],
+    "description": "The plotter of ruin, the bringer of calamity. It is the Howling Silence who has been tasked with heralding the arrival of the Dead Lord’s Avatar, the Howling Silence who has been tasked with paving the way.\n\nA master of illusions and fear, the Howling Silence has been driving the whole town mad for the last week, jumping on the opportunity to forge a Pact with a desperate girl…\n\nSee the Enemies section for more details."
+   },
+   "statblock": null,
+   "features": [],
+   "linked_to": "#tWRxfxASGZvClPsfV1FiIsN"
+  },
+  {
+   "name": "The Howling Silence",
+   "hash": "#tWRxfxASGZvClPsfV1FiIsN",
+   "extends": "Monster",
+   "profile": null,
+   "statblock": {
+    "Name": "The Howling Silence",
+    "Printed Type Line": "Large Fiend (Demon), Any Alignment",
+    "Size": "Large",
+    "Type": "Fiend (Demon)",
+    "Alignment": "Any Alignment",
+    "Armor Class": "15",
+    "Hit Points": "85",
+    "Hit Dice": "10d10 + 30",
+    "Experience Points": "5000",
+    "Proficiency Bonus": "4"
+   },
+   "features": [
+    {
+     "name": "Multiattack",
+     "category": "Action",
+     "description": "The Howling Silence makes two Arcane Burst attacks."
+    },
+    {
+     "name": "Arcane Burst",
+     "category": "Action",
+     "description": "*Melee or Ranged Spell Attack:* +5 to hit, reach 5 ft. or range 120 ft., one target. *Hit:* 14 (2d10 + 3) psychic damage."
+    },
+    {
+     "name": "Spellcasting",
+     "category": "Action",
+     "description": "The Howling Silence casts one of the following spells, using Intelligence as the spellcasting ability (spell save DC 17):\n\nAt will: command, mage hand, minor illusion\n2/day each: antagonize, disguise self, dissonant whispers, major image, phantasmal force, silvery barbs\n1/day each: fear, greater invisibility, mirror image, nystul's magic aura, phantasmal killer"
+    },
+    {
+     "name": "Displacement (Recharge 5–6)",
+     "category": "Bonus Action",
+     "description": "The Howling Silence projects an illusion that makes it appear to be standing in a place a few inches from its actual location, causing any creature to have disadvantage on attack rolls against the Howling Silence. The effect lasts for 1 minute, and it ends early if the Howling Silence takes damage, if it is incapacitated, or if its speed becomes 0."
+    },
+    {
+     "name": "Reaction Spellcasting",
+     "category": "Reaction",
+     "description": "The following spells from this creature's spell list may be cast as a reaction.\n\nsilvery barbs"
+    },
+    {
+     "name": "Legendary Spellcaster",
+     "category": "Legendary Action",
+     "description": "The Howling silence may spend one Legendary Action to cast any spell it can cast more than once a day."
+    }
+   ]
+  }
+ ],
+ "arc": {
+  "name": "The Exorcism of Mikko",
+  "description": "The Exorcism of Mikko is an adventure for characters between 6th and 9th level, depending on desired difficulty. Each character must have ties to either one of the churches of the Sol Warden, the Veiled Mother, or the Lady of Life, or have unquestioned loyalty to the political machine of the Empire. One character is the nominal figurehead of the party, and has been granted use of an Imperial Seal. In addition to the Imperial Seal, each character begins play with two uncommon magic items of the player’s choice.",
+  "themes": [
+   "An Imperial exorcism team sent to a snowbound logging town under siege by the Cult of Orcus",
+   "Possession, corruption, and the cost of exorcism (hit dice, sanctified incense, faith)",
+   "A family destroyed from within: the Taylors, their daughter Maya, and the pact she made to bring back her cat",
+   "A race against a ritual: the Howling Silence heralding an avatar of the Dead Lord"
+  ],
+  "locations": [
+   {
+    "name": "Weld",
+    "description": "A large forested city in the northeast area of the continent, where word arrived that a small logging town to the North is showing dark activity. Captain Ord and his small squad of men were detached from the regiment in Weld; the Steward of Weld's orders come from the Empress herself."
+   },
+   {
+    "name": "Mikko",
+    "description": "A small logging town situated on the border of the Everwood and the northern sea, with a population of 4,500 people, the majority of whom are human. Ringed by a fifteen foot tall palisade of sharpened logs; the woods just outside have been clear cut. Since the incident at the Taylor household the town is all but abandoned, its guards drunk and on hair triggers."
+   },
+   {
+    "name": "The Captain’s Office",
+    "description": "Once a meager home. On the lower floor sits a large desk, piled high with thick tomes and slim folios alike. Captain Samuel Ord briefs the party here."
+   },
+   {
+    "name": "The Ramshackle Infirmary",
+    "description": "The former town tavern, commandeered as the healer's house and subdivided into makeshift wards with old bedsheets and spare wood. Run by Wynota. A fully darkened room attached to the main area - what was once the tavern-owner’s office - holds Adam and Nikki Taylor."
+   },
+   {
+    "name": "The Taylor House",
+    "description": "A split level home in the middle of a village road, its front door shattered and a deep-set dark stain just inside the threshold - all that remains of the priest Mikkael. Bloody handprints in the entryway, a carving knife and the remains of a human face in the kitchen, Maya's bedroom, and a crude wooden marker in the garden engraved “Mister Whiskers”."
+   },
+   {
+    "name": "The Ruined Church",
+    "description": "Broken, and giving the air of one which has been for a long time; the roof has collapsed under the weight of the fallen statue of the Morninglord outside. The ruin becomes less severe the closer to the altar one approaches, because of the Censer of the Sol Warden hidden within the altar."
+   },
+   {
+    "name": "The Wall",
+    "description": "The guard posts along Mikko's palisade, manned by wary, tired, traumatized guardsmen who look like longstanding survivors of a deadly siege rather than a village posting along Axis’ northern coast."
+   },
+   {
+    "name": "The Snowbound Woods",
+    "description": "The area around Mikko is a blank canvas of frigid snow; the forest where the missing Sergeant Bruce wanders, dragging his axe behind him."
+   },
+   {
+    "name": "The Cabin in the Woods",
+    "description": "An old Forester’s shack outside of town, where Maya was moved once she was unconscious. Small animal corpses lie in a rough circle around it; inside, the walls are covered in sigils and Abyssal words of worship inscribed in blood and ash, and an illustration of a town in flame beneath a grinning ram's skull."
+   },
+   {
+    "name": "The Central Square",
+    "description": "The central square of Mikko, located just in front of the ruined church, with its defaced statue of the Sol Warden - the god of the sun - on which Samuel Ord is suspended by his ankles during the Ritual."
+   },
+   {
+    "name": "Eldham",
+    "description": "A town a mere four days' journey from Mikko, toward which the figure in the mixed-success epilogue walks."
+   }
+  ],
+  "phases": [
+   {
+    "name": "Arrival",
+    "description": "The party travels from Weld, meets the guards at the palisade, and is briefed by Captain Samuel Ord.",
+    "pacing": null,
+    "scene_hashes": [
+     "#tDISN9crLEcolsLVgExodwA",
+     "#tkf0t0jy5xHpj3I55FHSksX"
+    ]
+   },
+   {
+    "name": "Investigation",
+    "description": "The four leads from the Captain's briefing - the Infirmary, the Taylor House, the Ruined Church, the missing Sergeant - and the wall guards, in whatever order the party chooses; then the cabin where Maya was taken.",
+    "pacing": "Exorcising the Taylors or defeating Bruce before the Ritual removes each of them from it.",
+    "scene_hashes": [
+     "#tOfGjZdWM37FZsrugoP5bbi",
+     "#tJkU5HWE8BkR8Q0iD7Cv7Pn",
+     "#tCuvHmHQWgVv4GuDajQdBi8",
+     "#tjq3tikPpDRNVaWUdjmlxcL",
+     "#tCCqVlqevkqbvIKVXdauvX0",
+     "#tMXVnfB0NQZeHXC1rsmLCXg"
+    ]
+   },
+   {
+    "name": "The Ritual",
+    "description": "Smoke over Mikko: the race back through the Husk Zombies, and the Ritual in the central square.",
+    "pacing": null,
+    "scene_hashes": [
+     "#t8FLdZCw5EcddAlMnFyolMi",
+     "#ty6obMpYb0kl76mvajZqFjO"
+    ]
+   },
+   {
+    "name": "Epilogue",
+    "description": "One of the three printed endings, or the GM's own.",
+    "pacing": null,
+    "scene_hashes": [
+     "#tERewUz0GaRUqIxG5eSUwmm"
+    ]
+   }
+  ],
+  "scenes": [
+   {
+    "name": "Introduction",
+    "hash": "#tDISN9crLEcolsLVgExodwA",
+    "type": "Roleplay",
+    "location": "Weld",
+    "description": "The land of Axis is under siege. A newly founded Axin Empire, led by Empress Jocelynn Rivers, finds itself staring down the necrotic powers of the Demon Lord Orcus, the lord of Undeath and Silence. Demon cults have arisen all across the land, and the forces of darkness are spreading. The Empire is resisting as best as they can, fielding specialized teams of adventurers to locations where Orcus activity is suspiciously prevalent.\n\nYou are one group of such adventurers.\n\nWord has arrived in Weld, a large forested city in the northeast area of the continent, that a small logging town to the North is showing such dark activity. The town’s name is Mikko, situated on the border of the Everwood and the northern sea. The small logging town has a population of 4,500 people, the majority of whom are human. Unfortunately, the request for aid doesn’t include much detail- an oblique reference to ‘dark powers at work’ is about all the writer of the missive was able to include on the letter sent for aid.",
+    "read_aloud": [],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [
+      "Establish each character's tie to the Sol Warden, the Veiled Mother, the Lady of Life, or the Empire, and who bears the Imperial Seal"
+     ],
+     "optional": []
+    },
+    "conflict": null,
+    "resolutions": [],
+    "prerequisites": []
+   },
+   {
+    "name": "The Approach",
+    "hash": "#tkf0t0jy5xHpj3I55FHSksX",
+    "type": "Roleplay",
+    "location": "Mikko",
+    "description": "The adventure begins here, fifty feet beyond the wall and palisade of Mikko. The woods just outside have been clear cut, both for their lumber and as a defensive tactic to reveal any approaching invaders or monsters. With a DC 10 Perception check, the party will notice long, twisting scars in the wood, as though left by the claws of some terrible beast. A DC 15 Perception check will notice that the standard noises which suffuse a forest have been absent for some time, and that this selfsame silence seems to enfold the walls of the small town as well.\n\nShortly after the party reveals themselves, the most sober of the guards is dispatched to get the Captain. There is some time to find out what’s happening from the guards, should the party wish to do so.\n\nThe guards are drunk. They need to be. Interrogation and investigation reveals that not all is well in the logging town. It seems that each night things make their way to the wall, unseen and silent. Scratching at the walls, at the gates, at the insides of the guards’ skulls. The guards are on hair triggers, due to their fraying nerves.\n\nBefore any serious confrontations come to a head, the approaching figure of Captain Samuel Ord calls out a greeting. He will act to diffuse the situation, should it be getting heated. Once all that’s taken care of, he will introduce himself and begin to lead the party to his office in town, granting them their first real look at the town.\n\n“I’m glad to see you here. What’s happening is beyond my abilities. A week ago, I was sent here with a small squad of men, detached from the regiment in Weld. Since I’ve been here, it’s only gotten worse.”\n\nThe Captain’s office was once a meager home. On the lower floor sits a large desk, piled high with thick tomes and slim folios alike. Once you’ve all gathered within and the door has been shut, Samuel speaks.\n\n“For several nights since I arrived here there have been more and more unsettling events. I’ve doubled the guard rotation, but each morning my Night Watch are found all but pissing themselves in terror, or driven to further acts of desperation. One of my most trusted Sergeants seems particularly affected. It got significantly worse three nights ago, with the incident at the Taylor household.\n\n“Not many people are left in Mikko. Most are trying to flee, but we are under orders from the Steward of Weld… and his orders come from the Empress herself. The Empire needs this town to generate supplies for the war effort.\n\n“I need your help discovering what is causing this blight and how to remove it.”",
+    "read_aloud": [
+     "The journey from Weld to Mikko is a cold one. Tree branches, laden with heavy snow bend deeply under the weight, the occasional cracking of limbs in the distance forming a percussive counterpoint to the steady crunching of snow beneath your heavy boots. Mikko lies ahead, the fifteen foot tall palisade of sharpened logs looming over the cleared area around the town. Your orders stand firm in your mind. Make contact with the Guard of the city and render your services. Find the source of any Darkness, and extinguish it. Exorcize evil, whatever form it takes, from the stones of Mikko.",
+     "As you travel through the town, one word strikes you more than any others- Abandoned. A sparse few individuals haunt the shuttered windows of the townhomes, peering out at you. Occasional guards are outside, deep bruising under their eyes as they clutch the hilts of their weapons. No other citizens walk outside."
+    ],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [
+      "Make contact with the Guard and be briefed by Captain Samuel Ord"
+     ],
+     "optional": [
+      "Learn what the guards know before the Captain arrives"
+     ]
+    },
+    "conflict": null,
+    "resolutions": [],
+    "prerequisites": []
+   },
+   {
+    "name": "The Ramshackle Infirmary",
+    "hash": "#tOfGjZdWM37FZsrugoP5bbi",
+    "type": "Roleplay",
+    "location": "The Ramshackle Infirmary",
+    "description": "A DC 15 Perception or DC 10 Medicine check identifies the pigment over the Sign of Aid as being made of blood. A DC 13 History or Religion check will identify the new symbol as the Unholy Mark of Orcus.\n\nThe makeshift infirmary has been constructed in the former town tavern. Old bedsheets and spare wood separate portions of the tavern from each other, giving the patients a sense of privacy.\n\nThe patients themselves are despondent. Red burns mar skin throughout, though most of the wounds seem to be in the mind.\n\nIn a far corner, a woman stares intently at the wall. Her hair has been removed in clumps as she traces a drawing with bloody fingertips upon the wall. A DC 15 Perception check reveals that she is drawing a figure, something with terrible claws rising from within a human body.\n\nA bearded man, his hair matted and breathing ragged, stares at the party as they enter, his mouth moving as though he is speaking but without noise.\n\nExcessive noise sparks a violent reaction from several of the patients. The first to attack is the bearded man. He leaps to the loudest PC and attempts to grapple with an uncanny strength, all while hoarsely whispering at his target to ‘be silent!’\n\nAll the unwell are being tended to by Wynota, who wears a bandana bound to her head with a leather cord and an apron covered in blood and ash.\n\nIf the party asks Wynota about the Taylors, she will direct them to a fully darkened room attached to the main area- what was once the tavern-owner’s office. She will warn the party that the Taylor’s, like the rest of the afflicted, do not react well to noises. Unlike the rest of her patients, however, they have a similar reaction to light. Nikki has been restrained for her own protection.\n\nWithin, in the dark, are Adam and Nikki Taylor.\n\nThe Taylors share a bunk bed, pushed against the wall of this cramped office. Adam occupies the top bunk, a wrap of gauze hiding his face. Occasionally, a murmur or whimper escapes from his lips- it’s hard to tell which. Nikki lies on the bottom bunk, moaning in pain, her arms tied to the bedframe above her revealing rippling burn scars which cover her forearms and hands.\n\nIf the lighting conditions become dim or brighter, both Taylors react poorly. Adam leaps up enraged and attacks, while Nikki’s arms ignite- her screams incite the rest of the Infirmary.\n\nBoth of the Taylors are currently possessed by Shadow Demons. They can be exorcized by any of the methods outlined in the Exorcising the Possessed section of this manual. Either of them, if exorcized, will not be present during the Ritual portion of this adventure.\n\nWynota requests that the party allow her to come with them to the Cabin to deal with Maya.",
+    "read_aloud": [
+     "As you approach the local watering hole, a banner draped over the peaked roof draws your attention- the Sign of Aid which lies prominent upon the broad canvas has been defaced. Long, angular strokes of streaking red-brown pigment describe a profane symbol writ large across its surface.",
+     "Inside, the tavern has been subdivided into makeshift wards. Patients, both medical and mental, cast their eyes towards the most recent intruders to their quiet respite. Sounds seem muffled here, as though fear itself is wrapped around this place’s occupants like a heavy layer of snow."
+    ],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [
+      "Speak with Wynota and find the Taylors"
+     ],
+     "optional": [
+      "Exorcize Adam and/or Nikki Taylor - either of them, if exorcized, will not be present during the Ritual",
+      "Accept Wynota's request to come along to the Cabin"
+     ]
+    },
+    "conflict": {
+     "type": "combat",
+     "stakes": "Excessive noise sparks a violent reaction from several of the patients; light or noise sets off the possessed Taylors and Nikki's screams incite the rest of the Infirmary.",
+     "rounds_until_completion": null,
+     "opponents": [
+      "#t5ICelx3fsVRG6EFdLdvN9w",
+      "#tX3QLNlyvWfUWk2CibFLiE6"
+     ]
+    },
+    "resolutions": [],
+    "prerequisites": []
+   },
+   {
+    "name": "The Taylor House",
+    "hash": "#tJkU5HWE8BkR8Q0iD7Cv7Pn",
+    "type": "Roleplay",
+    "location": "The Taylor House",
+    "description": "As the party explores the Taylor Household, they may make several discoveries which can shed some light on what exactly took place here.",
+    "read_aloud": [
+     "A split level home sits in the middle of a village road. At first glance, it seems unremarkable; a winter garden growing along the back wall and intact windows looking out over the cold winter world. As you round the front however, the shattered front door tells a different story. Splintered remains litter the front stoop and accent a deep-set, dark stain on the floor just inside the threshold."
+    ],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [],
+     "optional": [
+      "Learn what took place in the Taylor household"
+     ]
+    },
+    "conflict": null,
+    "resolutions": [],
+    "prerequisites": []
+   },
+   {
+    "name": "The Ruined Church",
+    "hash": "#tCuvHmHQWgVv4GuDajQdBi8",
+    "type": "Combat",
+    "location": "The Ruined Church",
+    "description": "As the players investigate the ruined church, they may notice that the ruin becomes less severe the closer to the altar they approach. This is because of the Censor of the Sol Warden hidden within the altar, holding the degenerative properties of the Specters-of-Flame at bay. However, as the party approaches, the two incorporeal arsonists manifest and engage in combat!\n\nAs the Specters-of-Flame engage, the church itself begins to catch fire, putting something of an external timer on the combat and escape of the party. The Specters-of-Flame move about as much as they can, even provoking opportunity attacks to spread their burning footprints about the wooden structure.\n\nIf the Party manages to find the secret compartment on the Altar (DC 15 Perception Check) they can retrieve the Censor of the Sol Warden and enough sanctified incense to use it twice.",
+    "read_aloud": [
+     "The church is broken, and gives the air of one which has been for a long time. Ancient, rotting wood lies at odd angles where the roof has collapsed under the weight of the fallen statue of the Morninglord outside. As you investigate the ruins, however, a strange effect catches your eye; the closer you get to the altar, the less aged the ruins seem to be. The altar itself merely supports a thin layer of dust."
+    ],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [],
+     "optional": [
+      "Retrieve the Censer of the Sol Warden and two uses of sanctified incense"
+     ]
+    },
+    "conflict": {
+     "type": "combat",
+     "stakes": "The church itself begins to catch fire, putting something of an external timer on the combat and escape of the party.",
+     "rounds_until_completion": null,
+     "opponents": [
+      "#tc33lRp5dj4ejAIoELoRtcM",
+      "#tc33lRp5dj4ejAIoELoRtcM"
+     ]
+    },
+    "resolutions": [],
+    "prerequisites": []
+   },
+   {
+    "name": "Guards on the Wall",
+    "hash": "#tjq3tikPpDRNVaWUdjmlxcL",
+    "type": "Roleplay",
+    "location": "The Wall",
+    "description": "A sufficiently creative or charismatic party might be able to bolster the guards’ spirits enough to assist in defense of the town during the Racing Back to Mikko portion of this adventure.\n\nIntimidation and posturing based on rank or appeals to duty are ineffective motivators for the traumatized guardsmen.",
+    "read_aloud": [
+     "As you approach the guard posts along the wall you are greeted by wary, tired eyes. Muttered greetings are the only acknowledgement of your rank within the Imperial command structure. Soiled and disheveled uniforms with sullen, worn expressions give the impression of longstanding survivors of a deadly siege rather than a village posting along Axis’ northern coast."
+    ],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [],
+     "optional": [
+      "Bolster the guards’ spirits so they assist during Racing Back to Mikko"
+     ]
+    },
+    "conflict": null,
+    "resolutions": [],
+    "prerequisites": []
+   },
+   {
+    "name": "A Sergeant, Wandering",
+    "hash": "#tCCqVlqevkqbvIKVXdauvX0",
+    "type": "Travel",
+    "location": "The Snowbound Woods",
+    "description": "Searching the forest around Mikko for the Sergeant is a daunting task. A successful DC 15 Survival check to track his steps through the snow-covered woods will find a tree with a bloody mark upon it at about head height for a Goliath.\n\nFinding Bruce from here is not particularly difficult. He dragged his axe behind him leaving a deep furrow in the earth and snow as he trudged through the frozen landscape. When the party encounters him, they will find a Bruce who lacks many of the supernatural abilities granted by Orcus, though he is clearly no longer human- he is becoming something more.\n\nIf the party is able to defeat him, they will not need to fight Bruce during the Ritual.",
+    "read_aloud": [
+     "The area around Mikko is a blank canvas of frigid snow. Finding a lone, absent Sergeant amidst the emptiness will be more difficult than it seems."
+    ],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [],
+     "optional": [
+      "Find and defeat Bruce before the Ritual"
+     ]
+    },
+    "conflict": {
+     "type": "combat",
+     "stakes": "If the party is able to defeat him, they will not need to fight Bruce during the Ritual.",
+     "rounds_until_completion": null,
+     "opponents": [
+      "#tOkQpCyyirkcNggJBhLFEQf"
+     ]
+    },
+    "resolutions": [],
+    "prerequisites": []
+   },
+   {
+    "name": "The Cabin in the Woods",
+    "hash": "#tMXVnfB0NQZeHXC1rsmLCXg",
+    "type": "Combat",
+    "location": "The Cabin in the Woods",
+    "description": "If Wynota accompanies the PCs to the Cabin, she is no longer dressed as a nurse. Instead she is clad in leathers, two vicious looking daggers hanging from her belt alongside several vials of unidentified potions. Inquiries regarding her skills are rebutted with her typical acerbic responses- she knows she can handle herself. If Maya survives the ensuing confrontation, Wynota offers to carry her back to Mikko.\n\nThe sounds inside the cabin are somewhat muffled, but are of a little girl having a tea party with a suite of imaginary friends. If the players make themselves known to Maya, the sound of play stops and she addresses them.\n\n“Mister Whiskers? Is that you? Come in and play, silly kitty!”\n\nWithin the cabin, the walls have been covered in sigils and illustrations, each letter inscribed with a mix of blood and ash. Words in Abyssal are trailed out by fingertip- though they all are words of worship and submission to the Lord of Silence. There is also an illustration along the far wall of a town in flame- a twisted mockery of a ram’s skull grinning over the incandescent settlement.\n\nMaya begins combat out of sight upon the ceiling, waiting for a foolish adventurer to advance through the doorway to the cabin so she can make a readied attack against them. As she makes her first attack, she speaks again in an unnaturally low and resonant voice-\n\n“The Great Silence Awaits.”\n\nShe then lets out an unearthly wail which can be heard for miles.\n\nAny character leaving the cabin after the confrontation will see a plume of smoke beginning to rise above Mikko in the distance.",
+    "read_aloud": [
+     "Once more, you travel through the silent winter of the northern shore. As you walk, you begin to hear a sound, a steady thumping like an axe handle against a recalcitrant stump. The sound gets louder and louder as you approach- when you are just out of sight the invisible axe handle breaks with a wet crunch. Only it wasn’t an axe handle at all. An elk lies dead at the bottom of a sturdy tree, its skull broken from where the elk had repeatedly smashed it into the tree. Something here is not right.",
+     "Small animal corpses lay spread in a rough circle around the cabin, the only motion amongst them the feasting flies. From within, you hear the sound of a child at play."
+    ],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [
+      "Confront Maya Taylor"
+     ],
+     "optional": [
+      "Take Maya alive - if she survives, Wynota offers to carry her back to Mikko"
+     ]
+    },
+    "conflict": {
+     "type": "combat",
+     "stakes": "Maya begins combat out of sight upon the ceiling with a readied attack; her wail can be heard for miles, and the infirmary burns in the party's absence.",
+     "rounds_until_completion": null,
+     "opponents": [
+      "#tOoD3ESbYAeO1dgx504rhR0"
+     ]
+    },
+    "resolutions": [],
+    "prerequisites": []
+   },
+   {
+    "name": "Racing Back to Mikko",
+    "hash": "#t8FLdZCw5EcddAlMnFyolMi",
+    "type": "Combat",
+    "location": "Mikko",
+    "description": "Shambling Husk Zombies emerge from the conflagration, attempting to harry or kill any intruders in the area.\n\nIf the party managed to bolster the spirits of the town guards, they are able to render assistance- subduing and killing the majority of the Husk Zombies before they are able to reach the party.\n\nShortly after the party is engaged by the Husk Zombies, a sickly green light begins to glow near the town center and a foul wind blows out from it, accompanied by screaming. The party should begin heading towards it to stop whatever is gathering power, there.",
+    "read_aloud": [
+     "Smoke rises, lit by the setting sun behind you. Something burns in Mikko. As you get closer to the village itself, the source of the fire becomes clear- someone has lit the infirmary on fire, and it has spread amongst some of the other dry buildings nearby. Even as you watch, a hollow-eyed villager emerges from the flames before looking towards you and letting loose a low, pain-filled moan and shambling towards you."
+    ],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [
+      "Get through the Husk Zombies to the sickly green light near the town center"
+     ],
+     "optional": []
+    },
+    "conflict": {
+     "type": "combat",
+     "stakes": "Reach the town center before whatever is gathering power there finishes.",
+     "rounds_until_completion": null,
+     "opponents": [
+      "#tI67DdEH8YJWHZ0DKR6Xb1D"
+     ]
+    },
+    "resolutions": [],
+    "prerequisites": [
+     "#tMXVnfB0NQZeHXC1rsmLCXg"
+    ]
+   },
+   {
+    "name": "The Ritual",
+    "hash": "#ty6obMpYb0kl76mvajZqFjO",
+    "type": "Combat",
+    "location": "The Central Square",
+    "description": "As the players enter into the central square of Mikko, located just in front of the ruined church, they can see the Captain suspended by his ankles on a defaced statue of the god of the sun. Blood, his blood, streams down the stone, pooling along lines etched in the ground as the Ritualists chant their profane chorus.\n\nDepending on the actions taken by the PCs, the Ritual is performed by up to three ritualists. If they have not been exorcised, Nikki and Adam Taylor lead the ritual while Bruce acts as a guardian, keeping the unwanted interference to a minimum. Bruce is capable of performing the ritual on his own, if the Taylors have been successfully exorcised.\n\nShould all three potential Ritualists have been defeated, the party must contend with The Howling Silence, Orcus’ last ditch effort to see his foul plans brought to Fruition.\n\nThe Ritual is already underway when the players arrive. Should the Ritualists survive another five rounds, it will reach its bloody end. An avatar of Orcus (the Boneclaw) will use Samuel’s ravaged body as a living portal from the Dead Lord’s Dread Realm.",
+    "read_aloud": [
+     "Hanging in the central promenade is Samuel Ord. He is conscious, as evidenced by his constant screams of pain, and suspended on the defaced statue of the Sol Warden. Even as you watch, an otherworldly hand presses against the inside of his torso and distends his flesh. The enactors of this foul rite stand nearby, chanting silent words to welcome the coming of their Lord Orcus’ chosen servant."
+    ],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [
+      "Stop the Ritual within five rounds"
+     ],
+     "optional": [
+      "Save Samuel Ord"
+     ]
+    },
+    "conflict": {
+     "type": "combat",
+     "stakes": "Should the Ritualists survive another five rounds, it will reach its bloody end. An avatar of Orcus (the Boneclaw) will use Samuel’s ravaged body as a living portal from the Dead Lord’s Dread Realm.",
+     "rounds_until_completion": "5",
+     "opponents": [
+      "#tX3QLNlyvWfUWk2CibFLiE6",
+      "#t5ICelx3fsVRG6EFdLdvN9w",
+      "#tOkQpCyyirkcNggJBhLFEQf",
+      "#tWRxfxASGZvClPsfV1FiIsN"
+     ]
+    },
+    "resolutions": [],
+    "prerequisites": [
+     "#t8FLdZCw5EcddAlMnFyolMi"
+    ]
+   },
+   {
+    "name": "Epilogue(s)",
+    "hash": "#tERewUz0GaRUqIxG5eSUwmm",
+    "type": "Roleplay",
+    "location": null,
+    "description": "There are as many ways for a story to end as there are players writing the tale. What follows are three potential endings, though a GM should always feel free to expand on them or write their own for their specific story!",
+    "read_aloud": [],
+    "checks": [],
+    "clues": [],
+    "objectives": {
+     "required": [],
+     "optional": []
+    },
+    "conflict": null,
+    "resolutions": [],
+    "prerequisites": [
+     "#ty6obMpYb0kl76mvajZqFjO"
+    ]
+   }
+  ],
+  "cast": [
+   {
+    "from": "Wyldwolf_Axis_Mikko_NPCs",
+    "hashes": [
+     "#tccC3iR2NKeONqopRsaEdgK",
+     "#tZl1z5jZTWVZQuaDct5nvKC",
+     "#t5ICelx3fsVRG6EFdLdvN9w",
+     "#tX3QLNlyvWfUWk2CibFLiE6",
+     "#tOkQpCyyirkcNggJBhLFEQf",
+     "#tOoD3ESbYAeO1dgx504rhR0",
+     "#tWRxfxASGZvClPsfV1FiIsN"
+    ]
+   },
+   {
+    "from": "Wyldwolf_Axis_Mikko_Adversaries",
+    "hashes": [
+     "#tI67DdEH8YJWHZ0DKR6Xb1D",
+     "#t5twReIoMoYcA91WqzZVzKM",
+     "#tc33lRp5dj4ejAIoELoRtcM"
+    ]
+   }
+  ]
+ },
+ "lore": [
+  {
+   "source": "wyldwolf-axis-mikko-0.5-adventure.lore",
+   "sections": [
+    {
+     "title": "The Exorcism of Mikko (LORE)",
+     "level": 1,
+     "paragraphs": []
+    },
+    {
+     "title": "Introduction",
+     "level": 2,
+     "paragraphs": [
+      "The land of Axis is under siege. A newly founded Axin Empire, led by Empress Jocelynn Rivers, finds itself staring down the necrotic powers of the Demon Lord Orcus, the lord of Undeath and Silence. Demon cults have arisen all across the land, and the forces of darkness are spreading. The Empire is resisting as best as they can, fielding specialized teams of adventurers to locations where Orcus activity is suspiciously prevalent.\nYou are one group of such adventurers.\nWord has arrived in Weld, a large forested city in the northeast area of the continent, that a small logging town to the North is showing such dark activity. The town’s name is Mikko, situated on the border of the Everwood and the northern sea. The small logging town has a population of 4,500 people, the majority of whom are human. Unfortunately, the request for aid doesn’t include much detail- an oblique reference to ‘dark powers at work’ is about all the writer of the missive was able to include on the letter sent for aid.\nThe Exorcism of Mikko is an adventure for characters between 6th and 9th level, depending on desired difficulty. Each character must have ties to either one of the churches of the Sol Warden, the Veiled Mother, or the Lady of Life, or have unquestioned loyalty to the political machine of the Empire. One character is the nominal figurehead of the party, and has been granted use of an Imperial Seal. In addition to the Imperial Seal, each character begins play with two uncommon magic items of the player’s choice."
+     ]
+    },
+    {
+     "title": "The Approach",
+     "level": 2,
+     "paragraphs": [
+      "> The journey from Weld to Mikko is a cold one. Tree branches, laden with heavy snow bend deeply under the weight, the occasional cracking of limbs in the distance forming a percussive counterpoint to the steady crunching of snow beneath your heavy boots. Mikko lies ahead, the fifteen foot tall palisade of sharpened logs looming over the cleared area around the town. Your orders stand firm in your mind. Make contact with the Guard of the city and render your services. Find the source of any Darkness, and extinguish it. Exorcize evil, whatever form it takes, from the stones of Mikko.\nThe adventure begins here, fifty feet beyond the wall and palisade of Mikko. The woods just outside have been clear cut, both for their lumber and as a defensive tactic to reveal any approaching invaders or monsters. With a DC 10 Perception check, the party will notice long, twisting scars in the wood, as though left by the claws of some terrible beast. A DC 15 Perception check will notice that the standard noises which suffuse a forest have been absent for some time, and that this selfsame silence seems to enfold the walls of the small town as well.\nShortly after the party reveals themselves, the most sober of the guards is dispatched to get the Captain. There is some time to find out what’s happening from the guards, should the party wish to do so.\nThe guards are drunk. They need to be. Interrogation and investigation reveals that not all is well in the logging town. It seems that each night things make their way to the wall, unseen and silent. Scratching at the walls, at the gates, at the insides of the guards’ skulls. The guards are on hair triggers, due to their fraying nerves.\nBefore any serious confrontations come to a head, the approaching figure of Captain Samuel Ord calls out a greeting. He will act to diffuse the situation, should it be getting heated. Once all that’s taken care of, he will introduce himself and begin to lead the party to his office in town, granting them their first real look at the town.\n“I’m glad to see you here. What’s happening is beyond my abilities. A week ago, I was sent here with a small squad of men, detached from the regiment in Weld. Since I’ve been here, it’s only gotten worse.”\n> As you travel through the town, one word strikes you more than any others- Abandoned. A sparse few individuals haunt the shuttered windows of the townhomes, peering out at you. Occasional guards are outside, deep bruising under their eyes as they clutch the hilts of their weapons. No other citizens walk outside.\nThe Captain’s office was once a meager home. On the lower floor sits a large desk, piled high with thick tomes and slim folios alike. Once you’ve all gathered within and the door has been shut, Samuel speaks.\n“For several nights since I arrived here there have been more and more unsettling events. I’ve doubled the guard rotation, but each morning my Night Watch are found all but pissing themselves in terror, or driven to further acts of desperation. One of my most trusted Sergeants seems particularly affected. It got significantly worse three nights ago, with the incident at the Taylor household.\n“Not many people are left in Mikko. Most are trying to flee, but we are under orders from the Steward of Weld… and his orders come from the Empress herself. The Empire needs this town to generate supplies for the war effort.\n“I need your help discovering what is causing this blight and how to remove it.”\nIf the party asks about the missing **Sergeant**, Samuel will tell them about **Bruce**.\n\"I fought with him in Pinevaut, in Tyr, I trust that man with my life and others lives. But a few nights ago some of the men found him missing from his post. He was found naked out in the woods talking nonsense.\"\nIf the party asks about the **Incident at the Taylor Household**, Samuel lets out a deep sigh.\n“A few nights ago, Nikki and Adam Taylor heard their daughter scream in the night. They ran into the room and found her crawling on the ceiling. Nikki pulled the child, Maya, down but suffered burns in the process. Adam tried to pull Maya off of Nikki when she screamed at him. The local Priest, Mikkael, and I were nearby and responded as quickly as we could. Mikkeal began to channel the name of Pelor to ward against Fiends but… the child opened his throat.” Here, Samuel casts his gaze to the dented hammer at his side. “I managed to strike her with my hammer, hard enough to kill. Somehow… she lived. The last act of Mikkael was to cast some spell with his blood, and it seemed to slow her rage. Once she was unconscious, we moved her to an old Forester’s shack outside of town.”\nIf the party asks about the wounded in town, Samuel will tell them about the **Infirmary**.\n“There isn’t enough room in the town’s clinic, so we’ve commandeered the local tavern to make space. That’s become the healer’s house, of late. The whole place is run by a woman named Wynota. She’s skilled and reliable, or at least has been since I arrived. If you check in on the wounded, which I recommend, talk to her. A word of warning, though, she is a bit… prickly. Word is, she lost her husband not that long ago.”\nIf the party asks about Religion or the Priest, Samuel will tell them about **The Ruined Church**.\n“Something went wrong, that night when Mikkael died. The church… it has only been a few days, but it’s broken and abandoned like an ancient thing. Perhaps there are materials there that can help you with your task- Mikkael’s last spell did seem to have some effect, after all.”"
+     ]
+    },
+    {
+     "title": "The Ramshackle Infirmary",
+     "level": 2,
+     "paragraphs": [
+      "> As you approach the local watering hole, a banner draped over the peaked roof draws your attention- the Sign of Aid which lies prominent upon the broad canvas has been defaced. Long, angular strokes of streaking red-brown pigment describe a profane symbol writ large across its surface.\n>\n> Inside, the tavern has been subdivided into makeshift wards. Patients, both medical and mental, cast their eyes towards the most recent intruders to their quiet respite. Sounds seem muffled here, as though fear itself is wrapped around this place’s occupants like a heavy layer of snow.\nA DC 15 Perception or DC 10 Medicine check identifies the pigment over the Sign of Aid as being made of blood. A DC 13 History or Religion check will identify the new symbol as the Unholy Mark of Orcus.\nThe makeshift infirmary has been constructed in the former town tavern. Old bedsheets and spare wood separate portions of the tavern from each other, giving the patients a sense of privacy.\nThe patients themselves are despondent. Red burns mar skin throughout, though most of the wounds seem to be in the mind.\nIn a far corner, a woman stares intently at the wall. Her hair has been removed in clumps as she traces a drawing with bloody fingertips upon the wall. A DC 15 Perception check reveals that she is drawing a figure, something with terrible claws rising from within a human body.\nA bearded man, his hair matted and breathing ragged, stares at the party as they enter, his mouth moving as though he is speaking but without noise.\nExcessive noise sparks a violent reaction from several of the patients. The first to attack is the bearded man. He leaps to the loudest PC and attempts to grapple with an uncanny strength, all while hoarsely whispering at his target to ‘be silent!’\nAll the unwell are being tended to by Wynota, who wears a bandana bound to her head with a leather cord and an apron covered in blood and ash.\nIf the party asks Wynota about the Taylors, she will direct them to a fully darkened room attached to the main area- what was once the tavern-owner’s office. She will warn the party that the Taylor’s, like the rest of the afflicted, do not react well to noises. Unlike the rest of her patients, however, they have a similar reaction to light. Nikki has been restrained for her own protection.\nWithin, in the dark, are Adam and Nikki Taylor.\nThe Taylors share a bunk bed, pushed against the wall of this cramped office. Adam occupies the top bunk, a wrap of gauze hiding his face. Occasionally, a murmur or whimper escapes from his lips- it’s hard to tell which. Nikki lies on the bottom bunk, moaning in pain, her arms tied to the bedframe above her revealing rippling burn scars which cover her forearms and hands.\nIf the lighting conditions become dim or brighter, both Taylors react poorly. Adam leaps up enraged and attacks, while Nikki’s arms ignite- her screams incite the rest of the Infirmary.\nBoth of the Taylors are currently possessed by Shadow Demons. They can be exorcized by any of the methods outlined in the Exorcising the Possessed section of this manual. Either of them, if exorcized, will not be present during the Ritual portion of this adventure.\nWynota requests that the party allow her to come with them to the Cabin to deal with Maya."
+     ]
+    },
+    {
+     "title": "The Taylor House",
+     "level": 2,
+     "paragraphs": [
+      "> A split level home sits in the middle of a village road. At first glance, it seems unremarkable; a winter garden growing along the back wall and intact windows looking out over the cold winter world. As you round the front however, the shattered front door tells a different story. Splintered remains litter the front stoop and accent a deep-set, dark stain on the floor just inside the threshold.\nAs the party explores the Taylor Household, they may make several discoveries which can shed some light on what exactly took place here.\nOn the walls in the entryway, bloody handprints are set everywhere. They are partially smeared by time and activity but careful investigation (DC 13 Investigation check) reveals multiple sizes of hands used in this sanguinous artwork. One set small, the hands of a little girl, and two larger sets of hands. The deep stain on the floor is all that remains of the priest Mikkael- preserved by some eldritch quirk of fate.\nIn the kitchen, a bloody carving knife lies discarded upon a countertop next to what can be identified as the remains of a human face. This is where Adam, newly possessed by a shadow demon, removed his own face and carved the unholy symbol of Orcus into his now-exposed skull.\nIn Maya’s bedroom, the scent of rot has begun to suffuse the air. Painted above her bed, in blood, is a gruesome image- a man without a face standing before a gathered crowd. Anyone searching the bed will discover the dismembered remains of several cats and kittens from around the village. Additionally, hidden beneath her pillow, there is a battered journal filled with spidery handwriting with a cat-sized collar being used as an improvised bookmark. Players holding the journal might perceive a fell whispering at the edge of hearing, urging them to commit foul deeds in pursuit of the reclamation of things long lost.\nIn the garden, just within sight of the window to Maya’s room, there is a crude wooden marker. Engraved poorly on it is the name “Mister Whiskers”."
+     ]
+    },
+    {
+     "title": "The Ruined Church",
+     "level": 2,
+     "paragraphs": [
+      "> The church is broken, and gives the air of one which has been for a long time. Ancient, rotting wood lies at odd angles where the roof has collapsed under the weight of the fallen statue of the Morninglord outside. As you investigate the ruins, however, a strange effect catches your eye; the closer you get to the altar, the less aged the ruins seem to be. The altar itself merely supports a thin layer of dust.\nAs the players investigate the ruined church, they may notice that the ruin becomes less severe the closer to the altar they approach. This is because of the Censor of the Sol Warden hidden within the altar, holding the degenerative properties of the Specters-of-Flame at bay. However, as the party approaches, the two incorporeal arsonists manifest and engage in combat!\nAs the Specters-of-Flame engage, the church itself begins to catch fire, putting something of an external timer on the combat and escape of the party. The Specters-of-Flame move about as much as they can, even provoking opportunity attacks to spread their burning footprints about the wooden structure.\nIf the Party manages to find the secret compartment on the Altar (DC 15 Perception Check) they can retrieve the Censor of the Sol Warden and enough sanctified incense to use it twice."
+     ]
+    },
+    {
+     "title": "Guards on the Wall",
+     "level": 2,
+     "paragraphs": [
+      "> As you approach the guard posts along the wall you are greeted by wary, tired eyes. Muttered greetings are the only acknowledgement of your rank within the Imperial command structure. Soiled and disheveled uniforms with sullen, worn expressions give the impression of longstanding survivors of a deadly siege rather than a village posting along Axis’ northern coast.\nA sufficiently creative or charismatic party might be able to bolster the guards’ spirits enough to assist in defense of the town during the Racing Back to Mikko portion of this adventure.\nIntimidation and posturing based on rank or appeals to duty are ineffective motivators for the traumatized guardsmen."
+     ]
+    },
+    {
+     "title": "A Sergeant, Wandering",
+     "level": 2,
+     "paragraphs": [
+      "> The area around Mikko is a blank canvas of frigid snow. Finding a lone, absent Sergeant amidst the emptiness will be more difficult than it seems.\nSearching the forest around Mikko for the Sergeant is a daunting task. A successful DC 15 Survival check to track his steps through the snow-covered woods will find a tree with a bloody mark upon it at about head height for a Goliath.\nFinding Bruce from here is not particularly difficult. He dragged his axe behind him leaving a deep furrow in the earth and snow as he trudged through the frozen landscape. When the party encounters him, they will find a Bruce who lacks many of the supernatural abilities granted by Orcus, though he is clearly no longer human- he is becoming something more.\nIf the party is able to defeat him, they will not need to fight Bruce during the Ritual."
+     ]
+    },
+    {
+     "title": "The Cabin in the Woods",
+     "level": 2,
+     "paragraphs": [
+      "> Once more, you travel through the silent winter of the northern shore. As you walk, you begin to hear a sound, a steady thumping like an axe handle against a recalcitrant stump. The sound gets louder and louder as you approach- when you are just out of sight the invisible axe handle breaks with a wet crunch. Only it wasn’t an axe handle at all. An elk lies dead at the bottom of a sturdy tree, its skull broken from where the elk had repeatedly smashed it into the tree. Something here is not right.\n>\n> Small animal corpses lay spread in a rough circle around the cabin, the only motion amongst them the feasting flies. From within, you hear the sound of a child at play.\nIf Wynota accompanies the PCs to the Cabin, she is no longer dressed as a nurse. Instead she is clad in leathers, two vicious looking daggers hanging from her belt alongside several vials of unidentified potions. Inquiries regarding her skills are rebutted with her typical acerbic responses- she knows she can handle herself. If Maya survives the ensuing confrontation, Wynota offers to carry her back to Mikko.\nThe sounds inside the cabin are somewhat muffled, but are of a little girl having a tea party with a suite of imaginary friends. If the players make themselves known to Maya, the sound of play stops and she addresses them.\n“Mister Whiskers? Is that you? Come in and play, silly kitty!”\nWithin the cabin, the walls have been covered in sigils and illustrations, each letter inscribed with a mix of blood and ash. Words in Abyssal are trailed out by fingertip- though they all are words of worship and submission to the Lord of Silence. There is also an illustration along the far wall of a town in flame- a twisted mockery of a ram’s skull grinning over the incandescent settlement.\nMaya begins combat out of sight upon the ceiling, waiting for a foolish adventurer to advance through the doorway to the cabin so she can make a readied attack against them. As she makes her first attack, she speaks again in an unnaturally low and resonant voice-\n“The Great Silence Awaits.”\nShe then lets out an unearthly wail which can be heard for miles.\nAny character leaving the cabin after the confrontation will see a plume of smoke beginning to rise above Mikko in the distance."
+     ]
+    },
+    {
+     "title": "Racing Back to Mikko",
+     "level": 2,
+     "paragraphs": [
+      "> Smoke rises, lit by the setting sun behind you. Something burns in Mikko. As you get closer to the village itself, the source of the fire becomes clear- someone has lit the infirmary on fire, and it has spread amongst some of the other dry buildings nearby. Even as you watch, a hollow-eyed villager emerges from the flames before looking towards you and letting loose a low, pain-filled moan and shambling towards you.\nShambling Husk Zombies emerge from the conflagration, attempting to harry or kill any intruders in the area.\nIf the party managed to bolster the spirits of the town guards, they are able to render assistance- subduing and killing the majority of the Husk Zombies before they are able to reach the party.\nShortly after the party is engaged by the Husk Zombies, a sickly green light begins to glow near the town center and a foul wind blows out from it, accompanied by screaming. The party should begin heading towards it to stop whatever is gathering power, there."
+     ]
+    },
+    {
+     "title": "The Ritual",
+     "level": 2,
+     "paragraphs": [
+      "> Hanging in the central promenade is Samuel Ord. He is conscious, as evidenced by his constant screams of pain, and suspended on the defaced statue of the Sol Warden. Even as you watch, an otherworldly hand presses against the inside of his torso and distends his flesh. The enactors of this foul rite stand nearby, chanting silent words to welcome the coming of their Lord Orcus’ chosen servant.\nAs the players enter into the central square of Mikko, located just in front of the ruined church, they can see the Captain suspended by his ankles on a defaced statue of the god of the sun. Blood, his blood, streams down the stone, pooling along lines etched in the ground as the Ritualists chant their profane chorus.\nDepending on the actions taken by the PCs, the Ritual is performed by up to three ritualists. If they have not been exorcised, Nikki and Adam Taylor lead the ritual while Bruce acts as a guardian, keeping the unwanted interference to a minimum. Bruce is capable of performing the ritual on his own, if the Taylors have been successfully exorcised.\nShould all three potential Ritualists have been defeated, the party must contend with The Howling Silence, Orcus’ last ditch effort to see his foul plans brought to Fruition.\nThe Ritual is already underway when the players arrive. Should the Ritualists survive another five rounds, it will reach its bloody end. An avatar of Orcus (the Boneclaw) will use Samuel’s ravaged body as a living portal from the Dead Lord’s Dread Realm."
+     ]
+    },
+    {
+     "title": "Epilogue(s)",
+     "level": 2,
+     "paragraphs": [
+      "There are as many ways for a story to end as there are players writing the tale. What follows are three potential endings, though a GM should always feel free to expand on them or write their own for their specific story!"
+     ]
+    },
+    {
+     "title": "If the players are successful and manage to save Samuel Ord",
+     "level": 3,
+     "paragraphs": [
+      "Sam groans, coughing up blood as he surveys the ruin of Mikko. “All things considered,” he rasps, “it could have been worse. We’ll mourn. We’ll rally. We’ll rebuild.” There is a shaky smile as he stands a little straighter. “Thank you, heroes. Mikko won’t forget what you’ve done, and neither will I.”"
+     ]
+    },
+    {
+     "title": "If the ritual succeeds, calling the Boneclaw into the world",
+     "level": 3,
+     "paragraphs": [
+      "There is a sound on the other side of silence, one which devours noise and leaves nothing but emptiness in its wake. With a tear, this anti-noise screams out of the ruins of Samuel Ord’s body alongside a tremendous ivory claw. All across Weld, prophets and clairvoyants fall to their knees as they weep tears of blood. “A destroyer has come…” they whisper to unheeding winds, “a destroyer has come…” There are no more stories of Mikko. Only silence, as still as the grave."
+     ]
+    },
+    {
+     "title": "In the event of a mixed success",
+     "level": 3,
+     "paragraphs": [
+      "As the heroes breathe deeply, knowing the great calamity has been avoided, a figure treads through the snow outside. Deep furrows in the otherwise trackless expanse mark its passing. As it enters into the Everwood, shadows begin to stir, twisting about to gaze with sightless eyes at the figure. Words pass below the hearing of even the most keen-eared elf, and the shadows begin flowing into the figure's silhouette. Soundlessly, it continues walking beneath the pale light of the moon. The town of Eldham is a mere four days' journey from Mikko. There will be opportunities there, as well."
+     ]
+    }
+   ]
+  },
+  {
+   "source": "wyldwolf-axis-preview-0.5-setting.lore",
+   "sections": [
+    {
+     "title": "The Axis Saga: War of Silence — Preview (LORE)",
+     "level": 1,
+     "paragraphs": []
+    },
+    {
+     "title": "About Wyldwolf Games",
+     "level": 2,
+     "paragraphs": [
+      "Wyldwolf Games is a professional Game Master studio and tabletop experience company dedicated to empowering stories and storytellers.\nThe Axis Saga is the culmination of nearly a decade of campaigns and creative development within that community. What began at the table has grown into a fully realized dark fantasy setting designed for players and Game Masters everywhere."
+     ]
+    },
+    {
+     "title": "A Work in Progress",
+     "level": 2,
+     "paragraphs": [
+      "The Axis Saga is currently in active development. Every page in this preview represents the latest version of the project, but all mechanics, balance, wording, artwork, and presentation remain subject to refinement through continued playtesting and editorial review."
+     ]
+    },
+    {
+     "title": "Step Inside the World of Axis",
+     "level": 2,
+     "paragraphs": [
+      "**A World Where Hope Is Worth Reclaiming**\nThe Axis Saga: War of Silence is a dark fantasy campaign setting for 5E and 5.5E where becoming a vampyre isn’t the end of your humanity...it’s your greatest chance to save it.\nSet in a gothic world inspired by the 16th century, every choice carries weight. Power has a cost. Hope must be reclaimed.\nInside you’ll discover:\n- A complete campaign and setting guide.\n- The Gift, a player character vampyre system unlike anything in 5E. Become a vampyre, unlock powerful abilities, and master a hunger that threatens to consume you.\n- Faster, high-impact gameplay with Accelerated Axis casting and enhanced martial systems.\n- A living world where your decisions can become canon and shape future adventures for players around the world.\n- A brand new class, 12 original subclasses, unforgettable creatures, and innovative new mechanics.\n- A full chapter of new creatures for players to encounter.\n- Premium rewards, digital tools, and exclusive content created alongside a coalition of industry-defining TTRPG partners."
+     ]
+    },
+    {
+     "title": "The Gift",
+     "level": 2,
+     "paragraphs": [
+      "Vampyres have walked the lands of Medi and Axis long before either were named. They are not undead. They are not corpses animated by magic. They are living beings altered by an ancient curse that forces them to walk the edge of life and death. Upon becoming a vampyre, a creature’s physiology forever alters. Their hearts beat, though slowly. Their wounds close faster than they should, and their uncanny presence unsettles as easily as it attracts, luring friend and foe.\nSo long as they are properly fed, a vampyre remains physically immortal. A vampyre’s body retains its apparent maturity at the age the creature was turned. Over decades, however, the curse refines the body toward its prime. In time, most settle into what would be considered ideal physical condition. While immune to the ravages of age, vampyres are not invulnerable. Silver cuts through their healing, and direct sunlight burns their flesh. Magic and catastrophic trauma can slay them despite their resilience. Yet more than any blade or flame, vampyres of Axis are defined by one truth: Hunger. It is the curse.\n**In the Full Release:** Explore vampyre society, Imperial law, blood rationing, the Farm, and the lives of those who embrace or reject the Gift."
+     ]
+    },
+    {
+     "title": "The Curse",
+     "level": 2,
+     "paragraphs": [
+      "Since the turning of the first vampyre, the demand has been clear. Blood must be taken. Freely given blood does not fully satisfy the curse. It does not demand cruelty or spectacle, but it does demand the act of taking sustenance from the life of another sapient creature. The hunger is not a virtue of the Pattern, it is a flaw within the vampyre that defines them. Left alone, they hunt. Left unchecked, they destabilize their environment. Discipline does not erase the curse, but can help contain it, granting the vampyre glimpses of what others consider normalcy."
+     ]
+    },
+    {
+     "title": "Jocelynn Rivers and The Gift",
+     "level": 2,
+     "paragraphs": [
+      "Empress Jocelynn Rivers is a vampyre who refused to be bound by the chains of the curse. As she honed her sorcerous skills and prowess she sought to change the rules for her kind. Rather than deny what vampyres are, she built structure around their lives. Under her rule, the framework known as The Gift was established.\nVampyres who accept Imperial law become Eternals. They feed through sanctioned means, live within society, and serve the Empire openly. To be offered The Gift is both honor and obligation. Some accept The Gift because they believe discipline proves they are more than monsters. They command armies, govern provinces, teach at universities, and serve as long memories in a short-lived world. Others accept it for quieter reasons. To exist without being hunted. To trade chaos for stability. To live within walls instead of beyond them.\nThe Empire supplies regulated blood through a sophisticated collection system. In return, they serve society and do not prey upon it. The Gift is a bond between those who refuse to be ruled by the curse and a nation willing to regulate what it fears."
+     ]
+    },
+    {
+     "title": "The Farm",
+     "level": 2,
+     "paragraphs": [
+      "There are moments when governance becomes a debate of which choice is the least among several evils. Blood must be taken, so the Empire built the Prison of Rivers, known simply as the Farm. Those guilty of capital crimes are sent there. Their blood is drawn in controlled cycles and refined through alchemy to sustain the Eternal population. It is not celebrated, it is not hidden and it is defended, physically and legally, as necessary despite its macabre nature.\nWithout the Empire providing a steady stream of blood, the innocent would feed the cursed hunger. Instead, the condemned do. The Empire of Axis does not claim the line is clean. It claims the line is held. Whether that is justice or convenience depends on who is asked."
+     ]
+    },
+    {
+     "title": "Hunger and Sunlight",
+     "level": 2,
+     "paragraphs": [
+      "Vampyres are always hungry.\nThey must consume more mortal food than non-vampyres and are never truly full. Blood stabilizes the curse, but only for a time. An Eternal who feeds remains ageless. One who starves weakens, frays, and eventually becomes a danger to everyone, including themselves.\nSunlight is uncompromising. Direct exposure burns a vampyre quickly with vigilant intensity. The Empire commissions Sunguard Cloaks so Eternals may walk in daylight, though with reduced speed and agility."
+     ]
+    },
+    {
+     "title": "Knighthawks and Reclaimers",
+     "level": 2,
+     "paragraphs": [
+      "The Gift is not granted without oversight. When immortality and hunger are involved, laws must have teeth.\nThe Knighthawks serve as Imperial agents, tasked with ensuring vampyres remain bound to the law. They investigate unlawful feeding, illicit turning, and signs of instability. Bearing silver, sanctioned magic, and the authority to act, they enforce the law whether the accused agrees or not.\nIf a threat exceeds their reach, the Reclaimers are sent.\nReclaimers are vampyres who have reclaimed more than restraint. Through secret rites and powerful Sunward Tattoos that shield them from the sun’s burn, they walk in the sunlight once more. Wielding handcannons engineered to end their own kind with speed and finality, Reclaimers are proof that the curse can be disciplined and serve as a reminder that the contract of The Gift will be enforced.\nReclaimers are the Empire’s elite and Empress Jocelynn’s final argument. When a Reclaimer arrives, debate has ended."
+     ]
+    },
+    {
+     "title": "The Unforgiven",
+     "level": 2,
+     "paragraphs": [
+      "Not all vampyres accept The Gift.\nThose who reject imperial law and the discipline of the Gift are known as the Unforgiven. Rather than control the curse, they embrace it, reveling in the strength, freedom, and dominance it offers them. Their features sharpen, their fangs lengthen and increase in number, and their predatory instincts are indulged rather than mastered. Many Unforgiven grow tremendously powerful. Blood magic becomes instinctive, and the hunt transforms from necessity into deep pleasure and obsession. To them, feeding is not survival, but proof of superiority as the apex predator.\nYet the power comes at a cost. The curse rules them more completely, making them increasingly unstable as hunger clouds their reason and judgement. Many Unforgiven can gather devoted followers, build criminal empires, or carve out domains through fear and influence.\nThe Empire tolerates no Unforgiven within its borders. Knighthawks investigate them & the Reclaimers hunt them. Wherever they emerge, Imperial law responds without mercy.\nTo the Unforgiven, the Gift is not salvation. It is total surrender. Most would rather die than accept a life they believe places them beneath another’s authority"
+     ]
+    },
+    {
+     "title": "The Silence",
+     "level": 2,
+     "paragraphs": [
+      "It begins quietly. A stray intrusive thought lingers too long. Doubt grows where confidence once stood. Rest fails to restore. The Silence does not arrive as an invader. It speaks in your own voice.\n> You should have done better.”\n>\n> “They are disappointed in you.”\n>\n> “You are not enough.”\nEncouragement grows distant. Praise feels hollow. The mind filters the world differently, amplifying criticism and diminishing comfort. The world itself does not darken, but the curse shades your interpretation of it, Twisting your vision of the things that once brought you peace.\nMany experience their first symptom as a faint ringing in the ears. Subtle. Persistent. Making reality feel slightly out of tune. The Silence is the true antagonist of Axis. It is not a monster to hunt nor a tyrant to overthrow, but an insidious mental assault that settles behind the eyes and hums beneath conscious thought. It erodes certainty, dulls joy, and thins resolve until resistance feels disproportionate to the effort of living.\nLeft unchecked, the Silence deepens. Magic falters mid-incantation. Sacred oaths grow brittle as their meanings fade. Bonds strain and fracture. Communities corrode from within, turning their restless suspicion and hatred into weapons. The Silence does not march with armies. It grows inside people.\nIt does not rely on willing servants alone. Desperation, rage, and isolation feed it. A rebel consumed by hatred strengthens it as surely as any tyrant. A vampyre enthralled by domination empowers it. A dragon convinced the world must bow before her terrible might becomes its instrument.\nThe Silence cares nothing for ideology. It thrives wherever empathy collapses and destruction feels easier than understanding. The pious, the profane, and lost all fall victim to its creeping grasp. When someone finally yields, the most dangerous moment begins. The pressure eases. The ringing softens. The world feels clearer, almost merciful. In that quiet they begin seeking others who “understand.” They diminish, reduce, and evangelize.\nWithout realizing it, they begin bringing about the Great Silence on Kryphos’ behalf. From commoner to king, soldier to archmage, halfling to dragon, no mind capable of self-reflection lies beyond its reach. The stronger the will, the deeper its Resonance within the Pattern, and the more fiercely the Silence works to erode it.\nNo one is too small to matter.\nNo one is too powerful to fall."
+     ]
+    },
+    {
+     "title": "The Secret of Axis",
+     "level": 2,
+     "paragraphs": [
+      "Hidden within The Axis Saga is a sealed chapter that our community has protected for years. It contains a revelation that changes how you see the world, and everything that follows.\nFor over a decade, players have honored one simple tradition:\n**Honor the stories, protect the secret.**\nJoin The Axis Saga: War of Silence and earn the right to discover the secret yourself!\nAxis needs heroes!"
+     ]
+    }
+   ]
+  }
+ ]
+}
