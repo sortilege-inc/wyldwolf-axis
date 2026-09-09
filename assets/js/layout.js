@@ -182,7 +182,8 @@ window.AxisLayout = (function () {
           e.stopPropagation();
           closeTab(parent, index, i);
         });
-        const t = el('button', { class: 'tile-tab' + (pid === id ? ' on' : ''), type: 'button' }, [Panels.PANELS[pid] ? Panels.PANELS[pid].label : pid, close]);
+        const label = Panels.PANELS[pid] ? Panels.PANELS[pid].label : pid;
+        const t = el('button', { class: 'tile-tab' + (pid === id ? ' on' : ''), type: 'button', title: label }, [label, close]);
         t.addEventListener('click', () => {
           parent.children[index].active = i;
           State.setLayout(tree);
@@ -191,7 +192,8 @@ window.AxisLayout = (function () {
         return t;
       }));
     } else {
-      title = el('span', {}, [Panels.PANELS[id] ? Panels.PANELS[id].label : id]);
+      const label = Panels.PANELS[id] ? Panels.PANELS[id].label : id;
+      title = el('span', { title: label }, [label]);
     }
     const isFocused = focused && focused.parent === parent && focused.index === index;
     const tile = el('div', { class: 'tile' + (isFocused ? ' focused' : ''), 'data-panel': id }, [

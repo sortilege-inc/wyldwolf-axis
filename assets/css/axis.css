@@ -357,7 +357,10 @@ main.view.tiles-mode {
 }
 .tile .view-header h1 { font-size: 1.45rem; }
 .tile.focused .tile-head { box-shadow: inset 0 -1px 0 var(--teal-dim); }
-.tile-tabs { display: flex; gap: 0.15rem; min-width: 0; overflow-x: auto; }
+.tile-tabs { display: flex; flex-wrap: wrap; gap: 0.15rem; min-width: 0; flex: 1; }
+.tile-head { flex-wrap: wrap; row-gap: 0.15rem; }
+.tile-head > span:first-child { overflow-wrap: anywhere; }
+.tile-head .tile-picker { max-width: 7rem; }
 .tile-tab {
   display: inline-flex;
   align-items: center;
@@ -372,7 +375,8 @@ main.view.tiles-mode {
   text-transform: uppercase;
   padding: 0.1rem 0.5rem;
   cursor: pointer;
-  white-space: nowrap;
+  text-align: left;
+  overflow-wrap: anywhere;
 }
 .tile-tab:hover { color: var(--frost); border-color: var(--line); }
 .tile-tab.on { color: var(--gold); background: var(--ink-3); border-color: var(--line); }
