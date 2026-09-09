@@ -17,6 +17,13 @@ python3 -m http.server 8934
 
 then open `http://localhost:8934/`.
 
+## Table password
+
+Every page asks for the table password once per browser (`assets/js/gate.js`). It is a
+latch, not security — the site is static and the check is client-side — so it keeps
+the tool from being wandered into and nothing more. Players joining a session need it
+too. To change it, put the SHA-256 of the new phrase in `gate.js`.
+
 ## The page
 
 At 900px and wider the main area is a **tile layout**: rows or columns of panels, nested
