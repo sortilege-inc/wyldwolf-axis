@@ -62,6 +62,16 @@ Inspector.
   button on an NPC row. Fixed at every entry point via `AxisRender.toInt`.
   Lesson kept: verify through the control the GM will use, not the API
   under it.
+- **VTT landed** (2026-09-08). Verified with three windows (GM page, table,
+  player view): tokens seeded from the running encounter with stat-block
+  sizes; drag snapped to cells and persisted; circle/fog-reveal/ping via
+  the real tools; right-click Damage 5 → 88→83 in state, on the token, and
+  in the GM's combat row and effects sidebar; condition pip on the token;
+  token click → GM Inspector; GM scene change → table and player view
+  followed; ping from the table → player view. Player view hid the token
+  outside the revealed rect, drew fog opaque, dropped HP numbers on NPCs.
+  One bug caught: the player toolbar never built (`switchScene` only built
+  it for the GM) — fixed.
 - **Test note:** End Encounter uses a native `confirm()`; scripted tests
   must stub `window.confirm` or the click silently does nothing.
 - NPC stat blocks from the Mikko PDF carry no ability scores; the

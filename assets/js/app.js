@@ -100,6 +100,16 @@
     buildLayoutControls();
   }
 
+  // The table (VTT) and the player view are separate windows on the same
+  // state; named targets so repeated clicks focus rather than multiply.
+  const windowControls = document.getElementById('window-controls');
+  const vttBtn = el('button', { class: 'btn' }, ['Open table (VTT)']);
+  vttBtn.addEventListener('click', () => window.open('vtt.html', 'wyldwolf-axis-vtt'));
+  const playerBtn = el('button', { class: 'btn btn-ghost' }, ['Open player view']);
+  playerBtn.addEventListener('click', () => window.open('vtt.html?view=player', 'wyldwolf-axis-player'));
+  windowControls.appendChild(vttBtn);
+  windowControls.appendChild(playerBtn);
+
   window.addEventListener('resize', applyMode);
   // Devtools viewport emulation changes innerWidth without a resize event;
   // the media-query change fires either way.

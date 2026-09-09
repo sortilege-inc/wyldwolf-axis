@@ -594,5 +594,5 @@ window.AxisPlayMode = (function () {
     container.appendChild(logNode);
   }
 
-  return { render, parseRollableActions, rollDiceExpr, adversaryDexMod, extractSpellRefs };
+  return { render, parseRollableActions, rollDiceExpr, adversaryDexMod, extractSpellRefs, CONDITION_NAMES };
 })();

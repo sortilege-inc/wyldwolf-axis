@@ -55,6 +55,14 @@ window.AxisState = (function () {
       // preset. Per-browser like everything else here, and carried in the
       // GM-state export so a table setup travels with the campaign.
       layout: null,
+      // VTT maps, one per scene (see vtt.js). Tokens bind to combat
+      // instances by instanceId — HP/conditions live on the instance, the
+      // token only knows where it stands. Cell units throughout.
+      // sceneHash -> { image, w, h, grid: { size, ox, oy, show, snap },
+      //                tokens: [{ instanceId, x, y, size, hidden }],
+      //                effects: [{ id, kind, ... }],
+      //                fog: { enabled, revealed: [{ x, y, w, h }] } }
+      maps: {},
     };
   }
 
@@ -231,7 +239,22 @@ window.AxisState = (function () {
       encounterOverrides: state.encounterOverrides,
       combat: state.combat,
       layout: state.layout,
+      maps: state.maps,
     };
+  }
+
+  // ── VTT maps ───────────────────────────────────────────────────────
+  function mapState(sceneHash) {
+    return state.maps[sceneHash] || null;
+  }
+
+  function setMapState(sceneHash, map) {
+    state.maps[sceneHash] = map;
+    save();
+  }
+
+  function genEffectId() {
+    return 'fx_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   }
 
   function loadGmStateFile(gmData) {
@@ -241,6 +264,7 @@ window.AxisState = (function () {
     if (gmData.encounterOverrides) state.encounterOverrides = Object.assign({}, state.encounterOverrides, gmData.encounterOverrides);
     if (gmData.combat) state.combat = Object.assign({}, state.combat, gmData.combat);
     if (gmData.layout) state.layout = gmData.layout;
+    if (gmData.maps) state.maps = Object.assign({}, state.maps, gmData.maps);
     save();
   }
 
@@ -363,7 +387,7 @@ window.AxisState = (function () {
   }
 
   return {
-    state, save, reload, layout, setLayout,
+    state, save, reload, layout, setLayout, mapState, setMapState, genEffectId,
     sceneState, setSceneDone, setSceneNotes, adventureProgress,
     addPartyMember, resyncPartyMember, removePartyMember, setPartyHp, setPartyNotes, setPartyConditions,
     loadPartyFile, exportPartyFile,

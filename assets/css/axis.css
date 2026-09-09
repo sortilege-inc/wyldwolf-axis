@@ -219,6 +219,66 @@ main.view.tiles-mode {
 .combat-name-btn { font-weight: 600; }
 .scene-stack { margin-top: 1.2rem; }
 
+/* ── VTT window (vtt.html / vtt.js) ────────────────────── */
+
+body.vtt { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+.vtt-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  background: var(--ink-2);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.82rem;
+  flex: none;
+}
+.vtt-toolbar .group { display: flex; align-items: center; gap: 0.35rem; padding-right: 0.6rem; border-right: 1px solid var(--line); }
+.vtt-toolbar .group.last { border-right: none; margin-left: auto; }
+.vtt-toolbar label { color: var(--frost); display: inline-flex; align-items: center; gap: 0.25rem; }
+.vtt-toolbar .hp-current-input { width: 3.6rem; }
+.vtt-toolbar .vtt-url { max-width: 16rem; font-size: 0.8rem; padding: 0.25rem 0.4rem; }
+.vtt-toolbar .btn { padding: 0.3rem 0.6rem; }
+.vtt-toolbar .btn.active { border-color: var(--teal); color: var(--paper); background: var(--ink-3); }
+.vtt-stage { flex: 1; min-height: 0; position: relative; background: #07090b; }
+svg#map { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+svg#map.panning { cursor: grabbing; }
+svg#map.tool-active { cursor: crosshair; }
+.grid-line { stroke: rgba(233, 228, 216, 0.22); stroke-width: 1; }
+.fog { fill: #05070a; opacity: 0.55; }
+body.player .fog { opacity: 1; }
+.token { cursor: pointer; }
+body.player .token { cursor: default; }
+.token text { font-family: var(--font-display); fill: var(--paper); pointer-events: none; font-weight: 700; }
+.token .label { font-family: var(--font-body); fill: var(--frost); font-weight: 400; paint-order: stroke; stroke: #07090b; stroke-width: 3px; stroke-linejoin: round; }
+.token .pip { fill: var(--gold); stroke: #07090b; stroke-width: 1; }
+.token.selected .ring-outline { stroke: var(--paper) !important; stroke-dasharray: 6 4; }
+.token.dead { opacity: 0.45; }
+.token .dead-mark { fill: var(--danger-bright); }
+.token.hidden-token .body { stroke-dasharray: 4 4; }
+.token.hidden-token { opacity: 0.45; }
+.effect { fill: rgba(62, 207, 201, 0.16); stroke: var(--gold); stroke-width: 2; cursor: pointer; }
+.effect.line { stroke: rgba(62, 207, 201, 0.45); stroke-linecap: round; }
+.effect.selected { stroke: var(--teal); stroke-width: 3; }
+.effect.preview { pointer-events: none; stroke-dasharray: 8 6; }
+.ping { fill: none; stroke: var(--teal); stroke-width: 4; pointer-events: none; }
+.vtt-hint { position: absolute; left: 0.7rem; bottom: 0.5rem; color: var(--frost-dim); font-size: 0.75rem; pointer-events: none; }
+.vtt-menu {
+  position: absolute;
+  background: var(--ink-2);
+  border: 1px solid var(--gold-dim);
+  border-radius: 4px;
+  padding: 0.6rem 0.8rem;
+  min-width: 240px;
+  z-index: 10;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+  font-size: 0.85rem;
+}
+.vtt-menu h4 { margin: 0 0 0.2rem; font-size: 1.05rem; }
+.vtt-menu .row { display: flex; gap: 0.3rem; align-items: center; margin: 0.3rem 0; flex-wrap: wrap; }
+.vtt-menu .row:empty { display: none; }
+.window-controls { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.9rem; }
+
 /* Panels inside a narrow tile: the same collapses the viewport queries
    below do, keyed on the tile's own width. */
 @container (max-width: 720px) {

@@ -36,8 +36,31 @@ swap what it shows. Any panel not on screen opens in a drawer from the sidebar. 
 | **Adversaries / Spells / Items / Subclasses / Artifacts / Rules Glossary** | The merged corpus, searchable; Axis content extends the SRD, Mikko extends Axis. |
 | **Lore** | The adventure's narrative and the Axis preview, verbatim, by heading. |
 
-Every window of the tool (the main page now; the VTT and player view next) shares one
-localStorage state and one `BroadcastChannel`, so a change in one is live in the others.
+Every window of the tool shares one localStorage state and one `BroadcastChannel`, so a
+change in one is live in the others.
+
+## The table (VTT)
+
+**Open table (VTT)** in the sidebar opens `vtt.html`: the current scene's map with a
+grid, the encounter's combatants as tokens, effects and fog. It follows the GM's scene
+unless pinned. Tokens *are* the combat instances — HP rings, bloodied/dead state and
+condition pips come from the encounter, and the right-click menu writes damage,
+healing, conditions, hidden and size back through the same state, so the encounter
+panel updates as you go. Clicking a token selects it in the Inspector, and vice versa.
+
+- **Grid**: show / snap / cell size / offset — the calibration for a map that wasn't
+  drawn on a known grid. The infirmary still ships at 64px cells on its 2560px WebP.
+- **Set map**: any image URL; put files under `assets/maps/`. Sizes are read from the
+  image.
+- **Tools**: Ping (rings in every window), Circle, Cone (5e proportions), Line, Square.
+  Click an effect to select it, Delete or right-click to remove.
+- **Fog**: turn on, drag Reveal rectangles, Reset. Tokens outside a revealed area don't
+  exist in the player view.
+- **Open player view** opens `vtt.html?view=player`: no controls, fog opaque, hidden and
+  fogged tokens not drawn, HP numbers only on party tokens. Put it on the TV.
+
+Map state (image, grid, tokens, effects, fog) lives per scene in GM state and travels
+with the GM-state export.
 
 ## D&D Beyond import
 
