@@ -152,15 +152,25 @@ window.AxisRender = (function () {
   // Silence (Emissary of the Dead Lord)"), not the statblock hash, so this
   // follows linked_to in either direction to find the entry that actually
   // carries combat properties/features.
+  // Hash forms are NOT consistent across buckets: scene `conflict.opponents`
+  // and NPC `.hash`/`.linked_to` carry a leading "#", while adversary `.hash`
+  // does not. Compare on the bare id so a reference resolves regardless of
+  // which side it came from — stripping only one side silently breaks the
+  // other bucket (it left every named-cast opponent unresolvable).
+  function bareHash(h) {
+    return typeof h === 'string' && h.charAt(0) === '#' ? h.slice(1) : h;
+  }
+
   function resolveEntity(hash, adversaries, npcs) {
-    const a = (adversaries || []).find((x) => x.hash === hash);
+    hash = bareHash(hash);
+    const a = (adversaries || []).find((x) => bareHash(x.hash) === hash);
     if (a) return { kind: 'adversary', name: a.name, properties: a.properties, features: a.features };
-    let n = (npcs || []).find((x) => x.hash === hash);
+    let n = (npcs || []).find((x) => bareHash(x.hash) === hash);
     if (n && !n.statblock && n.linked_to) {
-      const linked = (npcs || []).find((x) => x.hash === n.linked_to);
+      const linked = (npcs || []).find((x) => bareHash(x.hash) === bareHash(n.linked_to));
       if (linked && linked.statblock) n = linked;
     }
-    if (!n) n = (npcs || []).find((x) => x.linked_to === hash);
+    if (!n) n = (npcs || []).find((x) => bareHash(x.linked_to) === hash);
     if (n) return { kind: 'npc', name: n.name, properties: n.statblock || null, features: n.features || [] };
     return null;
   }

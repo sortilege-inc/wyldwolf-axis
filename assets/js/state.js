@@ -28,12 +28,28 @@ window.AxisState = (function () {
       // page 1. Purely a UI convenience, not campaign progress.
       // adventureId -> pageIndex
       trackerPage: {},
-      // "Play mode" combat state per scene — initiative order/round/turn
-      // pointer for a live encounter. Combatant HP itself is NOT stored
-      // here: party HP lives in party[].gm.hpCurrent and adversary HP in
-      // encounterOverrides, both above, so this is only the turn-order
-      // bookkeeping layered on top of state that already existed.
-      // adventureId -> sceneHash -> { round, turnIndex, order: [{key, kind, initiative}] }
+          // "Play mode" combat state per scene — the LIVE, authoritative
+      // encounter roster once a GM has hit "Run Encounter": round/turn
+      // pointer plus one row per physical combatant instance (so the same
+      // adversary DEF can appear 3 times as 3 distinct tracked creatures).
+      // Reconciliation with pre-existing per-scene state (deliberate call,
+      // see playmode.js's header comment for the full reasoning):
+      //   - party[].gm.hpCurrent stays the source of truth for a PC's HP
+      //     OUTSIDE combat (Party tab); an active party instance here
+      //     mirrors it both ways while the encounter runs.
+      //   - encounterOverrides (scene+DEF-hash keyed, one row per unique
+      //     adversary type) is now ONLY the pre-encounter "scene default" —
+      //     a GM can still nudge a monster's starting HP before hitting Run
+      //     Encounter. Once instances exist for a scene, they are the only
+      //     thing read/written for live HP/conditions/initiative; ending
+      //     the encounter does not try to collapse N instances of one DEF
+      //     back into that one-row store.
+      // adventureId -> sceneHash -> {
+      //   round, turnIndex,
+      //   instances: [{ instanceId, defRef, sourceKind: 'party'|'adversary'|'npc',
+      //                  displayName, hpCurrent, hpMax, initiative,
+      //                  conditions: [{id, name, duration}], notes }]
+      // }
       combat: {},
     };
   }
@@ -181,6 +197,7 @@ window.AxisState = (function () {
       session: state.session,
       progress: state.progress,
       encounterOverrides: state.encounterOverrides,
+      combat: state.combat,
     };
   }
 
@@ -189,6 +206,7 @@ window.AxisState = (function () {
     if (gmData.session) state.session = gmData.session;
     if (gmData.progress) state.progress = Object.assign({}, state.progress, gmData.progress);
     if (gmData.encounterOverrides) state.encounterOverrides = Object.assign({}, state.encounterOverrides, gmData.encounterOverrides);
+    if (gmData.combat) state.combat = Object.assign({}, state.combat, gmData.combat);
     save();
   }
 
@@ -220,6 +238,96 @@ window.AxisState = (function () {
     save();
   }
 
+  function genInstanceId() {
+    return 'inst_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function genConditionId() {
+    return 'cond_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  }
+
+  function addCombatInstance(adventureId, sceneHash, instance) {
+    let combat = combatState(adventureId, sceneHash);
+    if (!combat) combat = { round: 1, turnIndex: 0, instances: [] };
+    if (!combat.instances) combat.instances = [];
+    const withId = Object.assign({ instanceId: genInstanceId(), initiative: null, conditions: [], notes: '' }, instance);
+    combat.instances.push(withId);
+    setCombatState(adventureId, sceneHash, combat);
+    return withId;
+  }
+
+  function removeCombatInstance(adventureId, sceneHash, instanceId) {
+    const combat = combatState(adventureId, sceneHash);
+    if (!combat) return;
+    combat.instances = (combat.instances || []).filter((i) => i.instanceId !== instanceId);
+    if (combat.turnIndex >= combat.instances.length) combat.turnIndex = 0;
+    setCombatState(adventureId, sceneHash, combat);
+  }
+
+  function setInstanceHp(adventureId, sceneHash, instanceId, hpCurrent) {
+    const combat = combatState(adventureId, sceneHash);
+    if (!combat) return;
+    const inst = (combat.instances || []).find((i) => i.instanceId === instanceId);
+    if (!inst) return;
+    inst.hpCurrent = hpCurrent;
+    setCombatState(adventureId, sceneHash, combat);
+    // Mirror party HP back to the party record so the Party tab (which
+    // reads party[].gm.hpCurrent, not combat state) stays in sync while an
+    // encounter is running.
+    if (inst.sourceKind === 'party') setPartyHp(inst.defRef, hpCurrent);
+  }
+
+  function setInstanceInitiative(adventureId, sceneHash, instanceId, initiative) {
+    const combat = combatState(adventureId, sceneHash);
+    if (!combat) return;
+    const inst = (combat.instances || []).find((i) => i.instanceId === instanceId);
+    if (!inst) return;
+    inst.initiative = initiative;
+    setCombatState(adventureId, sceneHash, combat);
+  }
+
+  function addInstanceCondition(adventureId, sceneHash, instanceId, name, duration) {
+    const combat = combatState(adventureId, sceneHash);
+    if (!combat) return;
+    const inst = (combat.instances || []).find((i) => i.instanceId === instanceId);
+    if (!inst) return;
+    if (!inst.conditions) inst.conditions = [];
+    inst.conditions.push({ id: genConditionId(), name, duration: duration != null && duration !== '' ? parseInt(duration, 10) : null });
+    setCombatState(adventureId, sceneHash, combat);
+  }
+
+  function removeInstanceCondition(adventureId, sceneHash, instanceId, conditionId) {
+    const combat = combatState(adventureId, sceneHash);
+    if (!combat) return;
+    const inst = (combat.instances || []).find((i) => i.instanceId === instanceId);
+    if (!inst) return;
+    inst.conditions = (inst.conditions || []).filter((c) => c.id !== conditionId);
+    setCombatState(adventureId, sceneHash, combat);
+  }
+
+  // Called when the round counter advances: decrements every timed
+  // condition by 1 across all instances and strips out anything that hits
+  // zero, returning what expired so the caller can log it. Untimed
+  // (duration: null) conditions are left alone — they're removed manually.
+  function tickDurations(adventureId, sceneHash) {
+    const combat = combatState(adventureId, sceneHash);
+    if (!combat) return [];
+    const expired = [];
+    (combat.instances || []).forEach((inst) => {
+      inst.conditions = (inst.conditions || []).filter((c) => {
+        if (c.duration == null) return true;
+        c.duration -= 1;
+        if (c.duration <= 0) {
+          expired.push({ instanceName: inst.displayName, conditionName: c.name });
+          return false;
+        }
+        return true;
+      });
+    });
+    setCombatState(adventureId, sceneHash, combat);
+    return expired;
+  }
+
   return {
     state, save, sceneState, setSceneDone, setSceneNotes, adventureProgress,
     addPartyMember, resyncPartyMember, removePartyMember, setPartyHp, setPartyNotes, setPartyConditions,
@@ -227,5 +335,7 @@ window.AxisState = (function () {
     encounterOverride, setEncounterOverride, exportGmStateFile, loadGmStateFile,
     trackerPage, setTrackerPage,
     combatState, setCombatState, clearCombatState,
+    addCombatInstance, removeCombatInstance, setInstanceHp, setInstanceInitiative,
+    addInstanceCondition, removeInstanceCondition, tickDurations,
   };
 })();

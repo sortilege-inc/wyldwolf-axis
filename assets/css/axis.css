@@ -332,7 +332,7 @@ textarea.notes {
 .combat-table { display: flex; flex-direction: column; gap: 0.4rem; margin: 0.8rem 0; }
 .combat-row {
   display: grid;
-  grid-template-columns: 1.5rem 1fr auto auto auto;
+  grid-template-columns: 1.5rem 1fr auto auto;
   align-items: center;
   gap: 0.6rem;
   background: var(--ink-2);
@@ -349,7 +349,8 @@ textarea.notes {
 .combat-hp { display: flex; align-items: center; gap: 0.3rem; font-family: var(--font-mono); font-size: 0.85rem; }
 .combat-hp .hp-amount { width: 3rem; }
 .hp-btn { padding: 0.2rem 0.55rem; }
-.combat-actions { display: flex; flex-wrap: wrap; gap: 0.3rem; grid-column: 1 / -1; }
+.combat-actions { display: flex; flex-wrap: wrap; gap: 0.3rem; grid-column: 1 / -1; align-items: center; }
+.combat-conditions { grid-column: 1 / -1; }
 .combatant-bloodied .combat-name { color: var(--danger-bright); }
 .combatant-dead { opacity: 0.55; }
 .combatant-dead .combat-name { text-decoration: line-through; }
@@ -360,6 +361,35 @@ textarea.notes {
 @media (max-width: 700px) {
   .combat-row { grid-template-columns: 1.2rem 1fr; }
   .combat-init, .combat-hp { grid-column: 1 / -1; }
+}
+
+/* ── play mode: roster editor, conditions, spell links, sidebar ───── */
+
+.roster-editor { border: 1px solid var(--line); background: var(--ink-2); border-radius: 4px; padding: 0.7rem 0.9rem; margin: 0.8rem 0; }
+.roster-editor h3 { font-size: 1rem; margin-bottom: 0.4rem; }
+.creature-search-results { margin-top: 0.5rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.creature-search-card { cursor: default; display: flex; flex-direction: column; gap: 0.4rem; }
+.creature-search-card .btn { align-self: flex-start; }
+
+.condition-chip { display: inline-flex; align-items: center; gap: 0.3rem; }
+.condition-remove { background: none; border: none; color: var(--frost-dim); cursor: pointer; font-size: 0.75rem; padding: 0; line-height: 1; }
+.condition-remove:hover { color: var(--danger-bright); }
+
+.spell-link-btn { color: var(--teal); font-style: italic; }
+.spell-link-miss { color: var(--frost-dim); font-style: italic; }
+.remove-combatant-btn { margin-left: auto; }
+
+.combat-body-layout { display: grid; grid-template-columns: 1fr 260px; gap: 1rem; align-items: start; }
+.effects-sidebar { border: 1px solid var(--gold-dim); background: var(--ink-2); border-radius: 4px; padding: 0.7rem 0.9rem; position: sticky; top: 1rem; }
+.effects-sidebar h3 { font-size: 1rem; }
+.effect-row { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.82rem; border-bottom: 1px dashed var(--line); padding: 0.3rem 0; }
+.effect-name { color: var(--paper); }
+.effect-condition { color: var(--gold); }
+.effect-duration { font-family: var(--font-mono); color: var(--frost-dim); }
+
+@media (max-width: 900px) {
+  .combat-body-layout { grid-template-columns: 1fr; }
+  .effects-sidebar { position: static; }
 }
 
 /* ── dashboard ──────────────────────────────────────────── */
