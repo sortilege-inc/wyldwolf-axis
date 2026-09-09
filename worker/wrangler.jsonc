@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "wyldwolf-axis-ddb-proxy",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-08",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    // The wyldwolf-axis app's own origin — the ONLY origin this Worker will
+    // set Access-Control-Allow-Origin to. Update this to match wherever
+    // index.html is actually served from (GitHub Pages, a custom domain,
+    // or http://localhost:PORT for local dev — add a second var/binding if
+    // you need both prod and local dev to work, see README.md).
+    "ALLOWED_ORIGIN": "https://REPLACE_ME.github.io"
+  }
+}

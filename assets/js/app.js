@@ -7,6 +7,7 @@
 
   const NAV = [
     { id: 'dashboard', label: 'Dashboard' },
+    { id: 'party', label: 'Party', count: () => window.AxisState.state.party.length },
     { id: 'adventure', label: 'Adventure Tracker' },
     { id: 'npcs', label: 'NPCs', count: () => data.npcs.length },
     { id: 'adversaries', label: 'Adversaries', count: () => data.adversaries.length },
@@ -45,6 +46,9 @@
       case 'dashboard':
         window.AxisDashboard.render(main, data, go);
         break;
+      case 'party':
+        window.AxisParty.render(main);
+        break;
       case 'adventure':
         window.AxisTracker.render(main, 'mikko', data.adventures.mikko, data.adversaries, data.npcs);
         break;
@@ -58,6 +62,10 @@
         window.AxisCatalog.render(main, current, data[current]);
     }
   }
+
+  // Exposed so views that mutate counted state outside the router (party
+  // add/remove) can refresh the sidebar's counts without a full nav change.
+  window.AxisApp = { refreshNav: buildNav };
 
   buildNav();
   renderView();
