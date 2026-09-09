@@ -378,6 +378,7 @@
     loadMap();
     syncTokens();
     renderAll();
+    if (overlay) renderOverlay();
     if (refit) fit();
     document.title = 'Wyldwolf Axis — ' + (scene() ? scene().name : 'Table');
     buildToolbar();
@@ -801,8 +802,131 @@
       : 'No encounter running for this scene — press Run encounter on it in the GM window and every combatant gets a token here.');
   }
 
+  // ── player view: party overlay + hover status ──────────────────────
+  // A draggable, translucent panel with the party's names, HP and
+  // conditions; hovering any token shows its state in words.
+  const OVERLAY_KEY = 'wyldwolf-axis-vtt-overlay';
+  let overlay = null;
+  let tooltip = null;
+
+  function statusWord(inst) {
+    const cur = toInt(inst.hpCurrent);
+    const max = toInt(inst.hpMax);
+    if (cur == null || max == null) return null;
+    if (cur <= 0) return 'Downed';
+    if (cur <= max / 2) return 'Bloodied';
+    if (cur < max) return 'Damaged';
+    return 'Unhurt';
+  }
+
+  function buildOverlay() {
+    overlay = el('div', { class: 'party-overlay' }, [
+      el('div', { class: 'party-overlay-head' }, [el('span', {}, ['Party']), el('span', { class: 'party-overlay-grip' }, ['⋮⋮'])]),
+      el('div', { class: 'party-overlay-body' }),
+    ]);
+    try {
+      const pos = JSON.parse(localStorage.getItem(OVERLAY_KEY) || 'null');
+      if (pos) {
+        overlay.style.left = pos.x + 'px';
+        overlay.style.top = pos.y + 'px';
+      }
+    } catch (e) {
+      /* default position */
+    }
+    const head = overlay.querySelector('.party-overlay-head');
+    head.addEventListener('pointerdown', (e) => {
+      const r = overlay.getBoundingClientRect();
+      const sr = stage.getBoundingClientRect();
+      const dx = e.clientX - r.left;
+      const dy = e.clientY - r.top;
+      head.setPointerCapture(e.pointerId);
+      const move = (ev) => {
+        const x = Math.max(0, Math.min(sr.width - r.width, ev.clientX - sr.left - dx));
+        const y = Math.max(0, Math.min(sr.height - r.height, ev.clientY - sr.top - dy));
+        overlay.style.left = x + 'px';
+        overlay.style.top = y + 'px';
+        overlay.style.right = 'auto';
+      };
+      const up = () => {
+        head.removeEventListener('pointermove', move);
+        head.removeEventListener('pointerup', up);
+        try {
+          localStorage.setItem(OVERLAY_KEY, JSON.stringify({ x: parseFloat(overlay.style.left), y: parseFloat(overlay.style.top) }));
+        } catch (err) {
+          /* no storage */
+        }
+      };
+      head.addEventListener('pointermove', move);
+      head.addEventListener('pointerup', up);
+    });
+    stage.appendChild(overlay);
+    tooltip = el('div', { class: 'token-tip' });
+    tooltip.hidden = true;
+    stage.appendChild(tooltip);
+  }
+
+  function renderOverlay() {
+    if (!overlay) return;
+    const body = overlay.querySelector('.party-overlay-body');
+    body.innerHTML = '';
+    const insts = instances();
+    (State.state.party || []).forEach((m) => {
+      const inst = insts.find((i) => i.sourceKind === 'party' && i.defRef === m.id);
+      const cur = inst ? toInt(inst.hpCurrent) : m.gm.hpCurrent;
+      const max = m.snapshot.hpMax;
+      const conds = inst ? (inst.conditions || []).map((c) => c.name + (c.duration != null ? ` ${c.duration}r` : '')) : m.gm.conditions || [];
+      const frac = max ? Math.max(0, Math.min(1, (cur || 0) / max)) : 1;
+      body.appendChild(el('div', { class: 'po-row' }, [
+        el('div', { class: 'po-line' }, [
+          el('span', { class: 'po-name' }, [m.snapshot.name]),
+          el('span', { class: 'po-hp' + (frac <= 0.25 ? ' crit' : frac <= 0.5 ? ' bloodied' : '') }, [`${cur != null ? cur : '—'} / ${max != null ? max : '—'}`]),
+        ]),
+        el('div', { class: 'hp-bar' + (frac <= 0.25 ? ' crit' : frac <= 0.5 ? ' bloodied' : '') }, [el('div', { class: 'hp-bar-fill', style: `width:${Math.round(frac * 100)}%` })]),
+        conds.length ? el('div', { class: 'chiprow po-conds' }, conds.map((c) => el('span', { class: 'chip condition-chip' }, [c]))) : null,
+      ]));
+    });
+    // companions in this encounter, under their owner's party
+    insts.filter((i) => i.sourceKind === 'companion').forEach((inst) => {
+      const cur = toInt(inst.hpCurrent);
+      const max = toInt(inst.hpMax);
+      body.appendChild(el('div', { class: 'po-row po-companion' }, [
+        el('div', { class: 'po-line' }, [el('span', { class: 'po-name' }, [inst.displayName]), el('span', { class: 'po-hp' }, [max != null ? `${cur} / ${max}` : ''])]),
+        (inst.conditions || []).length ? el('div', { class: 'chiprow po-conds' }, inst.conditions.map((c) => el('span', { class: 'chip condition-chip' }, [c.name]))) : null,
+      ]));
+    });
+    if (!body.children.length) body.appendChild(el('div', { class: 'view-sub' }, ['No party yet.']));
+  }
+
+  function showTip(t, inst, clientX, clientY) {
+    if (!tooltip) return;
+    const word = inst.sourceKind === 'party' || inst.sourceKind === 'companion' ? null : statusWord(inst);
+    const conds = (inst.conditions || []).map((c) => c.name + (c.duration != null ? ` · ${c.duration} rd${c.duration === 1 ? '' : 's'}` : ''));
+    tooltip.innerHTML = '';
+    tooltip.appendChild(el('div', { class: 'token-tip-name' }, [inst.displayName]));
+    if (word) tooltip.appendChild(el('div', { class: 'token-tip-status s-' + word.toLowerCase() }, [word]));
+    if (conds.length) tooltip.appendChild(el('div', { class: 'chiprow' }, conds.map((c) => el('span', { class: 'chip condition-chip' }, [c]))));
+    const sr = stage.getBoundingClientRect();
+    tooltip.style.left = Math.min(sr.width - 220, clientX - sr.left + 14) + 'px';
+    tooltip.style.top = Math.min(sr.height - 90, clientY - sr.top + 14) + 'px';
+    tooltip.hidden = false;
+  }
+
+  svg.addEventListener('pointerover', (e) => {
+    if (!tooltip) return;
+    const t = tokenAt(e.target);
+    if (!t) return;
+    const inst = instances().find((i) => i.instanceId === t.instanceId);
+    if (inst) showTip(t, inst, e.clientX, e.clientY);
+  });
+  svg.addEventListener('pointerout', (e) => {
+    if (tooltip && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.token'))) tooltip.hidden = true;
+  });
+
   // ── bus ────────────────────────────────────────────────────────────
-  Bus.on('state:changed', () => refresh());
+  Bus.on('state:changed', () => {
+    refresh();
+    renderOverlay();
+  });
   Bus.on('scene:changed', (p, meta) => {
     if (!(meta && meta.remote && follow && p && p.adventureId === adventureId)) return;
     const next = followedScene();
@@ -821,6 +945,10 @@
   // ── boot ───────────────────────────────────────────────────────────
   buildLayers();
   switchScene(sceneHash || followedScene(), true);
+  if (PLAYER) {
+    buildOverlay();
+    renderOverlay();
+  }
   window.addEventListener('resize', applyView);
 
   window.AxisVtt = { refresh, fit, map: () => map, scene: () => sceneHash, tool: () => tool };

@@ -39,7 +39,7 @@ window.AxisPlayMode = (function () {
   let activeLog = null;
   if (window.AxisBus) {
     window.AxisBus.on('roll', (p) => {
-      if (activeLog && p && p.text) activeLog(p.text);
+      if (activeLog && p && p.text) activeLog(p.targets && p.targets.length ? p : p.text);
     });
   }
 
@@ -232,12 +232,43 @@ window.AxisPlayMode = (function () {
     let combat = State.combatState(adventureId, scene.hash);
     const started = !!combat;
 
-    const logLines = [];
+    const logLines = []; // strings or roll payloads with targets
     const logNode = el('div', { class: 'roll-log' });
-    function log(text) {
-      logLines.unshift(text);
+    function logLine(entry) {
+      if (typeof entry === 'string') return el('div', { class: 'roll-log-line' }, [entry]);
+      // structured: per-target Apply / half / condition buttons
+      const line = el('div', { class: 'roll-log-line' }, [entry.text]);
+      if (entry.targets && entry.targets.length && entry.sceneHash) {
+        const ctl = el('div', { class: 'chiprow roll-log-ctl' });
+        entry.targets.forEach((t) => {
+          if (t.damage) {
+            const apply = el('button', { class: 'btn btn-ghost roll-btn' }, [`${t.name}: −${t.damage}`]);
+            apply.addEventListener('click', () => { if (window.AxisTargeting.applyDamage(entry.adventureId, entry.sceneHash, t.instanceId, t.damage)) apply.disabled = true; });
+            ctl.appendChild(apply);
+            if (!t.halved) {
+              const half = el('button', { class: 'btn btn-ghost roll-btn' }, [`−${Math.floor(t.damage / 2)}`]);
+              half.addEventListener('click', () => { if (window.AxisTargeting.applyDamage(entry.adventureId, entry.sceneHash, t.instanceId, Math.floor(t.damage / 2))) half.disabled = true; });
+              ctl.appendChild(half);
+            }
+          }
+          const sel = el('select', { class: 'hp-current-input' });
+          sel.appendChild(el('option', { value: '' }, [`${t.name}: + condition…`]));
+          CONDITION_NAMES.forEach((n) => sel.appendChild(el('option', { value: n }, [n])));
+          sel.addEventListener('change', () => {
+            if (!sel.value) return;
+            State.addInstanceCondition(entry.adventureId, entry.sceneHash, t.instanceId, sel.value, null);
+            sel.value = '';
+          });
+          ctl.appendChild(sel);
+        });
+        line.appendChild(ctl);
+      }
+      return line;
+    }
+    function log(entry) {
+      logLines.unshift(entry);
       logNode.innerHTML = '';
-      logLines.slice(0, 16).forEach((t) => logNode.appendChild(el('div', { class: 'roll-log-line' }, [t])));
+      logLines.slice(0, 16).forEach((e) => logNode.appendChild(logLine(e)));
     }
     // Rolls made on a character sheet (this window or a player's) land in
     // this log too. One module-level subscription; the current render's

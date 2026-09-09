@@ -43,6 +43,13 @@ window.AxisSheet = (function () {
     return combat ? { adventureId, sceneHash: page.scene.hash, scene: page.scene, combat } : null;
   }
 
+  // Rolls resolved elsewhere (targeting) for this character come back
+  // over the bus into the sheet's own log — the player's only log.
+  const sheetLogs = {};
+  Bus.on('roll', (p) => {
+    if (p && p.who && sheetLogs[p.who] && !p._fromSheet) sheetLogs[p.who](p.text);
+  });
+
   function characterSheet(member, opts) {
     opts = opts || {};
     const s = member.snapshot;
@@ -52,11 +59,16 @@ window.AxisSheet = (function () {
     const logNode = el('div', { class: 'roll-log sheet-log' });
     const logLines = [];
 
-    function log(text) {
+    function show(text) {
       logLines.unshift(text);
       logNode.innerHTML = '';
       logLines.slice(0, 12).forEach((t) => logNode.appendChild(el('div', { class: 'roll-log-line' }, [t])));
-      Bus.emit('roll', { who: s.name, memberId: member.id, text });
+    }
+    sheetLogs[s.name] = show;
+
+    function log(text) {
+      show(text);
+      Bus.emit('roll', { who: s.name, memberId: member.id, text, _fromSheet: true });
     }
 
     function d20(label, mod) {
@@ -64,7 +76,19 @@ window.AxisSheet = (function () {
       log(`${s.name} — ${label}: d20 [${r}]${fmtMod(mod)} = ${r + mod}`);
     }
 
+    // My own instance in the running encounter, so I'm not offered as my
+    // own target.
+    function myInstanceId() {
+      const enc = window.AxisTargeting && window.AxisTargeting.encounter();
+      const mine = enc && enc.combat.instances.find((i) => i.sourceKind === 'party' && i.defRef === member.id);
+      return mine ? mine.instanceId : null;
+    }
+
     function rollAttack(name, attackBonus, damage) {
+      if (window.AxisTargeting) {
+        window.AxisTargeting.attack(s.name, name, attackBonus, damage, { excludeInstanceId: myInstanceId() });
+        return;
+      }
       const r = rollDie(20);
       let text = `${s.name} — ${name}: attack d20 [${r}]${fmtMod(attackBonus)} = ${r + attackBonus}${r === 20 ? ' CRIT' : r === 1 ? ' (nat 1)' : ''}`;
       if (damage && damage.dice) {
@@ -294,6 +318,14 @@ window.AxisSheet = (function () {
         State.setSlotUsed(member.id, level, used + 1);
       }
       if (sp.resourceKey) State.setResourceUsed(member.id, sp.resourceKey, (gm.resourcesUsed[sp.resourceKey] || 0) + 1);
+      // attacks and saves go through targeting; the slot is already spent
+      if (window.AxisTargeting && (sp.attack || sp.save)) {
+        const label = `${sp.name}${sp.usesSlot ? ` (level ${level})` : ''}`;
+        if (sp.attack) window.AxisTargeting.attack(s.name, label, sp.attackBonus, sp.damage, { excludeInstanceId: myInstanceId() });
+        else window.AxisTargeting.save(s.name, label, sp.save.ability, sp.save.dc, sp.damage, { excludeInstanceId: myInstanceId() });
+        redraw();
+        return;
+      }
       let text = `${s.name} casts ${sp.name}${sp.usesSlot ? ` (level ${level})` : ''}`;
       if (sp.attack) {
         const r = rollDie(20);

@@ -23,14 +23,16 @@ window.AxisInspector = (function () {
     Bus.emit('roll', { who, text });
   }
 
-  function rollAttack(who, name, bonus, damage) {
-    const r = rollDie(20);
-    let text = `${who} — ${name}: attack d20 [${r}]${fmtMod(bonus)} = ${r + bonus}${r === 20 ? ' CRIT' : r === 1 ? ' (nat 1)' : ''}`;
-    if (damage && damage.dice) {
-      const d = window.AxisPlayMode.rollDiceExpr(damage.dice);
-      text += d.total != null ? ` · ${damage.dice} ${d.detail} = ${d.total}${damage.type ? ' ' + damage.type : ''}` : ` · ${damage.dice}`;
-    }
-    log(who, text);
+  // Targets come from the running encounter (targeting.js); the actor is
+  // excluded from its own target list.
+  function rollAttack(who, name, bonus, damage, selfId) {
+    window.AxisTargeting.attack(who, name, bonus, damage, { excludeInstanceId: selfId });
+  }
+  function rollSave(who, name, ability, dc, damage, selfId) {
+    window.AxisTargeting.save(who, name, ability, dc, damage, { excludeInstanceId: selfId });
+  }
+  function useOn(who, name, selfId) {
+    window.AxisTargeting.use(who, name, { excludeInstanceId: selfId });
   }
 
   // ── build the model ────────────────────────────────────────────────
@@ -54,13 +56,27 @@ window.AxisInspector = (function () {
     (s.spellSlots || []).forEach((sl) => resources.push({ label: `L${sl.level}`, text: `${sl.max - (gm.slotsUsed[sl.level] || 0)}/${sl.max}` }));
     (s.resources || []).forEach((r) => resources.push({ label: r.name, text: `${r.max - (gm.resourcesUsed[r.key] || 0)} / ${r.max}` }));
 
+    const selfId = inst ? inst.instanceId : null;
+    const who = inst ? inst.displayName : s.name;
     const groups = { actions: [], bonus: [], reactions: [], extra: [] };
     (s.actions || []).forEach((a) => {
-      const row = { name: a.name, note: [a.attackBonus != null ? fmtMod(a.attackBonus) : null, a.damage ? a.damage.dice + (a.damage.type ? ' ' + a.damage.type : '') : null, a.save ? `${a.save.ability.slice(0, 3)} DC ${a.save.dc}` : null].filter(Boolean).join(' · '), desc: a.description, roll: a.attackBonus != null ? () => rollAttack(s.name, a.name, a.attackBonus, a.damage) : null };
+      const row = {
+        name: a.name,
+        note: [a.attackBonus != null ? fmtMod(a.attackBonus) : null, a.damage ? a.damage.dice + (a.damage.type ? ' ' + a.damage.type : '') : null, a.save ? `${a.save.ability.slice(0, 3)} DC ${a.save.dc}` : null].filter(Boolean).join(' · '),
+        desc: a.description,
+        roll: a.attackBonus != null ? () => rollAttack(who, a.name, a.attackBonus, a.damage, selfId) : a.save ? () => rollSave(who, a.name, a.save.ability, a.save.dc, a.damage, selfId) : null,
+        use: a.attackBonus == null && !a.save ? () => useOn(who, a.name, selfId) : null,
+      };
       (a.activation === 'bonus' ? groups.bonus : a.activation === 'reaction' ? groups.reactions : groups.actions).push(row);
     });
     (s.spells || []).forEach((sp) => {
-      const row = { name: sp.name, note: [sp.level ? 'L' + sp.level : 'cantrip', sp.attack ? fmtMod(sp.attackBonus) : null, sp.save ? `${sp.save.ability.slice(0, 3)} DC ${sp.save.dc}` : null, sp.damage ? sp.damage.dice : null, sp.concentration ? 'conc.' : null].filter(Boolean).join(' · '), desc: sp.description || corpusSpellText(sp.name), roll: sp.attack ? () => rollAttack(s.name, sp.name, sp.attackBonus, sp.damage) : null };
+      const row = {
+        name: sp.name,
+        note: [sp.level ? 'L' + sp.level : 'cantrip', sp.attack ? fmtMod(sp.attackBonus) : null, sp.save ? `${sp.save.ability.slice(0, 3)} DC ${sp.save.dc}` : null, sp.damage ? sp.damage.dice : null, sp.concentration ? 'conc.' : null].filter(Boolean).join(' · '),
+        desc: sp.description || corpusSpellText(sp.name),
+        roll: sp.attack ? () => rollAttack(who, sp.name, sp.attackBonus, sp.damage, selfId) : sp.save ? () => rollSave(who, sp.name, sp.save.ability, sp.save.dc, sp.damage, selfId) : null,
+        use: !sp.attack && !sp.save ? () => useOn(who, sp.name, selfId) : null,
+      };
       groups.extra.push(row);
       if (sp.activation === 'bonus') groups.bonus.push(row);
       else if (sp.activation === 'reaction') groups.reactions.push(row);
@@ -102,10 +118,25 @@ window.AxisInspector = (function () {
     const feats = found.features || [];
     const rollable = window.AxisPlayMode.parseRollableActions(feats);
     const rollFor = (name) => rollable.find((r) => r.name === name);
+    const selfId = inst ? inst.instanceId : null;
     const groups = { actions: [], bonus: [], reactions: [], extra: [] };
     feats.forEach((f) => {
       const r = rollFor(f.name);
-      const row = { name: f.name, note: r && r.attackBonus != null ? [fmtMod(r.attackBonus), r.damageExpr ? r.damageExpr + (r.damageType ? ' ' + r.damageType : '') : null].filter(Boolean).join(' · ') : '', desc: f.description, roll: r && r.attackBonus != null ? () => rollAttack(displayName, f.name, r.attackBonus, r.damageExpr ? { dice: r.damageExpr, type: r.damageType } : null) : null };
+      // "Dexterity saving throw … DC 15" in the text → a save effect
+      const sv = /(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) saving throw/i.exec(f.description || '');
+      const dcM = /DC\s*(\d+)/.exec(f.description || '');
+      const dmgM = /\(?(\d+d\d+(?:\s*[+-]\s*\d+)?)\)?\s*(\w+)\s+damage/i.exec(f.description || '');
+      const isAttack = r && r.attackBonus != null;
+      const isSave = !isAttack && sv && dcM;
+      const row = {
+        name: f.name,
+        note: isAttack ? [fmtMod(r.attackBonus), r.damageExpr ? r.damageExpr + (r.damageType ? ' ' + r.damageType : '') : null].filter(Boolean).join(' · ') : isSave ? `${sv[1].slice(0, 3)} DC ${dcM[1]}` : '',
+        desc: f.description,
+        roll: isAttack ? () => rollAttack(displayName, f.name, r.attackBonus, r.damageExpr ? { dice: r.damageExpr, type: r.damageType } : null, selfId)
+          : isSave ? () => rollSave(displayName, f.name, sv[1][0].toUpperCase() + sv[1].slice(1).toLowerCase(), parseInt(dcM[1], 10), dmgM ? { dice: dmgM[1].replace(/\s+/g, ''), type: dmgM[2].toLowerCase() } : null, selfId)
+          : null,
+        use: !isAttack && !isSave && /^(Action|Bonus|Reaction|Legendary)/i.test(String(f.category || '')) ? () => useOn(displayName, f.name, selfId) : null,
+      };
       const cat = String(f.category || '');
       if (/^Bonus/i.test(cat)) groups.bonus.push(row);
       else if (/^Reaction/i.test(cat)) groups.reactions.push(row);
@@ -265,11 +296,12 @@ window.AxisInspector = (function () {
     if (current[2]) {
       if (!current[2].length) body.appendChild(el('div', { class: 'inspector-empty' }, ['Nothing here.']));
       current[2].forEach((row) => {
-        const nameNode = row.roll ? el('button', { class: 'btn ins-roll', type: 'button' }, [row.name + ' 🎲']) : el('span', { class: 'ins-act-name' }, [row.name]);
-        if (row.roll) nameNode.addEventListener('click', row.roll);
+        const act = row.roll || row.use;
+        const nameNode = act ? el('button', { class: 'btn ins-roll' + (row.roll ? '' : ' btn-ghost'), type: 'button', title: row.roll ? 'Roll against a target' : 'Use on a target' }, [row.name + (row.roll ? ' 🎲' : ' →')]) : el('span', { class: 'ins-act-name' }, [row.name]);
+        if (act) nameNode.addEventListener('click', act);
         const desc = el('div', { class: 'ins-act-desc', html: markdownish(row.desc || '') });
         const head = el('div', { class: 'ins-act-head' }, [nameNode, row.note ? el('span', { class: 'ins-act-note' }, [row.note]) : null]);
-        if (!row.roll) head.addEventListener('click', () => { desc.classList.toggle('open'); });
+        head.addEventListener('click', (e) => { if (!e.target.closest('button')) desc.classList.toggle('open'); });
         body.appendChild(el('div', { class: 'ins-act' }, [head, desc]));
       });
     } else {

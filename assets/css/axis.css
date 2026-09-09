@@ -538,6 +538,64 @@ body.player .token { cursor: default; }
 .effect.preview { pointer-events: none; stroke-dasharray: 8 6; }
 .ping { fill: none; stroke: var(--teal); stroke-width: 4; pointer-events: none; }
 .vtt-hint { position: absolute; left: 0.7rem; bottom: 0.5rem; color: var(--frost-dim); font-size: 0.75rem; pointer-events: none; }
+
+/* player view: party overlay + token tooltip */
+.party-overlay {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  width: 240px;
+  background: rgba(18, 22, 27, 0.78);
+  border: 1px solid rgba(143, 122, 77, 0.7);
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  z-index: 5;
+  font-size: 0.85rem;
+}
+.party-overlay-head { display: flex; align-items: center; justify-content: space-between; padding: 0.3rem 0.6rem; font-family: var(--font-display); color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.8rem; cursor: grab; border-bottom: 1px solid rgba(42, 50, 60, 0.9); user-select: none; }
+.party-overlay-head:active { cursor: grabbing; }
+.party-overlay-grip { color: var(--frost-dim); letter-spacing: -0.15em; }
+.party-overlay-body { padding: 0.4rem 0.6rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.po-row { display: flex; flex-direction: column; gap: 0.15rem; }
+.po-companion { padding-left: 0.8rem; border-left: 2px solid rgba(143, 217, 212, 0.5); }
+.po-line { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.po-name { color: var(--paper); font-family: var(--font-display); font-size: 0.95rem; }
+.po-hp { font-family: var(--font-mono); font-size: 0.8rem; color: var(--frost); }
+.po-hp.bloodied { color: var(--gold); }
+.po-hp.crit { color: var(--danger-bright); }
+.po-conds .chip { font-size: 0.68rem; padding: 0 0.4rem; }
+.token-tip {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  background: rgba(18, 22, 27, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.35rem 0.55rem;
+  min-width: 120px;
+  max-width: 220px;
+  font-size: 0.8rem;
+}
+.token-tip-name { font-family: var(--font-display); color: var(--gold); font-size: 0.95rem; }
+.token-tip-status { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--frost); }
+.token-tip-status.s-damaged { color: var(--gold); }
+.token-tip-status.s-bloodied { color: var(--danger-bright); }
+.token-tip-status.s-downed { color: var(--danger-bright); font-weight: 600; }
+.token-tip .chip { font-size: 0.68rem; padding: 0 0.4rem; }
+
+/* targeting picker + roll-log controls */
+.targeting { min-width: min(420px, 85vw); }
+.tg-list { display: flex; flex-direction: column; gap: 0.25rem; margin: 0.6rem 0; }
+.tg-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-left-width: 3px; border-radius: 3px; background: var(--ink-2); cursor: pointer; }
+.tg-row.kind-party { border-left-color: var(--teal); }
+.tg-row.kind-companion { border-left-color: #8fd9d4; }
+.tg-row.kind-npc { border-left-color: var(--gold); }
+.tg-row.kind-adversary { border-left-color: var(--danger); }
+.tg-name { font-family: var(--font-display); color: var(--paper); }
+.tg-meta { font-family: var(--font-mono); font-size: 0.75rem; color: var(--frost-dim); }
+.roll-log-ctl { margin: 0.2rem 0 0.1rem 1rem; }
+.roll-log-ctl .btn { padding: 0.1rem 0.45rem; font-size: 0.75rem; }
+.roll-log-ctl .hp-current-input { font-size: 0.75rem; }
 .vtt-menu {
   position: absolute;
   background: var(--ink-2);
