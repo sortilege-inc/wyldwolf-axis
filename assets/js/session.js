@@ -24,6 +24,7 @@ window.AxisSession = (function () {
   let status = 'offline'; // offline | connecting | online
   let receiving = false;
   let retry = null;
+  let failures = 0; // consecutive connection failures, for backoff
   let claims = {}; // memberId -> { name }
   const listeners = [];
 
@@ -137,7 +138,10 @@ window.AxisSession = (function () {
       if (ws !== sock) return;
       ws = null;
       setStatus('offline');
-      if (info) retry = setTimeout(connect, 2500);
+      // 2.5s, 5s, 10s … capped at a minute; reset on a good connection
+      failures += 1;
+      const delay = Math.min(60000, 2500 * Math.pow(2, Math.min(failures - 1, 5)));
+      if (info) retry = setTimeout(connect, delay);
     };
     sock.onerror = () => {};
   }
@@ -163,6 +167,7 @@ window.AxisSession = (function () {
         } else if (info.role === 'gm') {
           send({ type: 'init', doc: Ops.sharedSlice(State.state) });
         }
+        failures = 0;
         setStatus('online');
         break;
       }

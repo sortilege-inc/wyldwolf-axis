@@ -154,6 +154,29 @@
   windowControls.appendChild(vttBtn);
   windowControls.appendChild(playerBtn);
 
+  // ── sidebar collapse (a per-browser preference, not campaign state) ─
+  const UI_KEY = 'wyldwolf-axis-ui';
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('sidebar-toggle');
+  function uiPref() {
+    try {
+      return JSON.parse(localStorage.getItem(UI_KEY) || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+  function setCollapsed(on) {
+    document.body.classList.toggle('sidebar-collapsed', on);
+    toggle.setAttribute('aria-expanded', String(!on));
+    try {
+      localStorage.setItem(UI_KEY, JSON.stringify(Object.assign(uiPref(), { sidebarCollapsed: on })));
+    } catch (e) {
+      /* no storage */
+    }
+  }
+  toggle.addEventListener('click', () => setCollapsed(!document.body.classList.contains('sidebar-collapsed')));
+  setCollapsed(!!uiPref().sidebarCollapsed);
+
   window.addEventListener('resize', applyMode);
   // Devtools viewport emulation changes innerWidth without a resize event;
   // the media-query change fires either way.

@@ -20,7 +20,8 @@ window.AxisTracker = (function () {
     return scenes.find((s) => s.hash === hash);
   }
 
-  function buildPages(adventure) {
+  // Source order: the FLOW's phases, then any scene no phase references.
+  function sourcePages(adventure) {
     const pages = [];
     const referenced = new Set();
     (adventure.phases || []).forEach((phase) => {
@@ -34,6 +35,34 @@ window.AxisTracker = (function () {
       if (!referenced.has(s.hash)) pages.push({ phaseName: 'Other scenes', scene: s });
     });
     return pages;
+  }
+
+  function adventureIdOf(adventure) {
+    const advs = (window.AXIS && window.AXIS.adventures) || {};
+    return Object.keys(advs).find((k) => advs[k] === adventure) || null;
+  }
+
+  // The GM may reorder (State.sceneOrder); each scene keeps its source
+  // phase as its label. Scenes missing from a saved order go to the end,
+  // hashes that no longer exist are dropped.
+  function buildPages(adventure) {
+    const base = sourcePages(adventure);
+    const id = adventureIdOf(adventure);
+    const order = id && State.sceneOrder ? State.sceneOrder(id) : null;
+    if (!order || !order.length) return base;
+    const byHash = {};
+    base.forEach((p) => (byHash[p.scene.hash] = p));
+    const out = [];
+    order.forEach((h) => {
+      if (byHash[h]) {
+        out.push(byHash[h]);
+        delete byHash[h];
+      }
+    });
+    base.forEach((p) => {
+      if (byHash[p.scene.hash]) out.push(p);
+    });
+    return out;
   }
 
   function pageIndexFor(adventureId, pages) {
@@ -165,7 +194,7 @@ window.AxisTracker = (function () {
   // ── tracker half ───────────────────────────────────────────────────
   function renderTracker(container, adventureId, adventure, adversaries, npcs, ctx) {
     container.innerHTML = '';
-    const pages = buildPages(adventure);
+    let pages = buildPages(adventure);
     const totalScenes = adventure.scenes.length;
 
     const progLabel = el('div', { class: 'view-sub' });
@@ -179,21 +208,78 @@ window.AxisTracker = (function () {
       container.appendChild(el('ul', { class: 'themes-list' }, adventure.themes.map((t) => el('li', {}, [t]))));
     }
 
-    // phase-grouped picker: jump straight to any scene
+    // Scene list: number, name, source phase; drag a row to reorder. The
+    // order is shared state so the table and players page the same way.
     const pickerWrap = el('div', { class: 'page-picker' });
-    let phaseCursor = null;
-    let phaseRow = null;
-    pages.forEach((p, idx) => {
-      if (p.phaseName !== phaseCursor) {
-        phaseCursor = p.phaseName;
-        pickerWrap.appendChild(el('div', { class: 'page-picker-phase' }, [phaseCursor]));
-        phaseRow = el('div', { class: 'page-picker-row' });
-        pickerWrap.appendChild(phaseRow);
-      }
-      const btn = el('button', { class: 'page-dot', title: p.scene.name }, [String(idx + 1)]);
-      btn.addEventListener('click', () => goToPage(adventureId, pages, idx));
-      phaseRow.appendChild(btn);
-    });
+    let dragFrom = null;
+
+    function keepCurrent(current) {
+      pages = buildPages(adventure);
+      const keep = pages.findIndex((p) => p.scene.hash === current.scene.hash);
+      if (keep !== -1 && keep !== State.trackerPage(adventureId)) State.setTrackerPage(adventureId, keep);
+      buildPicker();
+      refresh();
+    }
+
+    function reorder(from, to) {
+      if (from === to || from == null || to == null) return;
+      const current = pages[pageIndexFor(adventureId, pages)];
+      const hashes = pages.map((p) => p.scene.hash);
+      const [moved] = hashes.splice(from, 1);
+      hashes.splice(to, 0, moved);
+      State.setSceneOrder(adventureId, hashes);
+      keepCurrent(current);
+    }
+
+    function buildPicker() {
+      pickerWrap.innerHTML = '';
+      let phaseCursor = null;
+      pages.forEach((p, idx) => {
+        if (p.phaseName !== phaseCursor) {
+          phaseCursor = p.phaseName;
+          pickerWrap.appendChild(el('div', { class: 'page-picker-phase' }, [phaseCursor]));
+        }
+        const row = el('div', { class: 'scene-row', draggable: 'true', title: 'Drag to reorder' }, [
+          el('span', { class: 'scene-grip' }, ['⋮⋮']),
+          el('span', { class: 'page-dot' }, [String(idx + 1)]),
+          el('span', { class: 'scene-row-name' }, [p.scene.name]),
+          p.scene.type ? el('span', { class: 'scene-row-type' }, [p.scene.type]) : null,
+        ]);
+        row.addEventListener('click', () => goToPage(adventureId, pages, idx));
+        row.addEventListener('dragstart', (e) => {
+          dragFrom = idx;
+          row.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', String(idx));
+        });
+        row.addEventListener('dragend', () => {
+          row.classList.remove('dragging');
+          pickerWrap.querySelectorAll('.scene-row.over').forEach((r) => r.classList.remove('over'));
+        });
+        row.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          row.classList.add('over');
+        });
+        row.addEventListener('dragleave', () => row.classList.remove('over'));
+        row.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const from = dragFrom != null ? dragFrom : parseInt(e.dataTransfer.getData('text/plain'), 10);
+          dragFrom = null;
+          reorder(from, idx);
+        });
+        pickerWrap.appendChild(row);
+      });
+      const reset = el('button', { class: 'btn btn-ghost' }, ['Restore source order']);
+      reset.hidden = !State.sceneOrder(adventureId);
+      reset.addEventListener('click', () => {
+        const current = pages[pageIndexFor(adventureId, pages)];
+        State.setSceneOrder(adventureId, null);
+        keepCurrent(current);
+      });
+      pickerWrap.appendChild(el('div', { class: 'chiprow' }, [reset]));
+    }
+    buildPicker();
 
     const prevBtn = el('button', { class: 'btn' }, ['◀ Prev']);
     const nextBtn = el('button', { class: 'btn' }, ['Next ▶']);
@@ -209,9 +295,9 @@ window.AxisTracker = (function () {
       const prog = State.adventureProgress(adventureId, totalScenes);
       progLabel.textContent = `${prog.done} / ${prog.total} scenes marked done`;
       progBar.style.width = `${totalScenes ? (100 * prog.done) / totalScenes : 0}%`;
-      Array.from(pickerWrap.querySelectorAll('.page-dot')).forEach((b, i) => {
-        b.classList.toggle('active', i === idx);
-        b.classList.toggle('done', State.sceneState(adventureId, pages[i].scene.hash).done);
+      Array.from(pickerWrap.querySelectorAll('.scene-row')).forEach((r, i) => {
+        r.classList.toggle('active', i === idx);
+        r.classList.toggle('done', State.sceneState(adventureId, pages[i].scene.hash).done);
       });
       if (!pages.length) {
         pageLabel.textContent = '';
@@ -224,7 +310,15 @@ window.AxisTracker = (function () {
     }
 
     ctx.on('scene:changed', refresh);
-    ctx.on('state:changed', refresh); // done-marks, progress
+    ctx.on('state:changed', () => {
+      // a reorder from another window rebuilds the list
+      const fresh = buildPages(adventure);
+      if (fresh.map((p) => p.scene.hash).join() !== pages.map((p) => p.scene.hash).join()) {
+        pages = fresh;
+        buildPicker();
+      }
+      refresh();
+    });
     refresh();
   }
 
@@ -235,9 +329,10 @@ window.AxisTracker = (function () {
   const playModeOn = {};
 
   function renderScene(container, adventureId, adventure, adversaries, npcs, ctx) {
-    const pages = buildPages(adventure);
+    let pages = buildPages(adventure);
 
     function draw() {
+      pages = buildPages(adventure);
       container.innerHTML = '';
       if (!pages.length) {
         container.appendChild(el('div', { class: 'view-sub' }, ['This adventure has no scenes yet.']));

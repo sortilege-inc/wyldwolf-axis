@@ -202,6 +202,13 @@
       if (!s.trackerPage) s.trackerPage = {};
       s.trackerPage[adventureId] = pageIndex;
     },
+    // GM's own scene order (array of scene hashes); null restores the
+    // source's. Shared so every window pages the same way.
+    setSceneOrder(s, adventureId, hashes) {
+      if (!s.sceneOrder) s.sceneOrder = {};
+      if (hashes) s.sceneOrder[adventureId] = hashes;
+      else delete s.sceneOrder[adventureId];
+    },
   };
 
   // ── roles ──────────────────────────────────────────────────────────
@@ -278,6 +285,7 @@
       combat: combatOut,
       maps: mapsOut,
       trackerPage: s.trackerPage || {},
+      sceneOrder: s.sceneOrder || {},
     };
   }
 
@@ -301,10 +309,10 @@
   // The shared slice of a full client state (what the GM sends to seed a
   // session).
   function sharedSlice(s) {
-    return { party: s.party || [], combat: s.combat || {}, maps: s.maps || {}, trackerPage: s.trackerPage || {} };
+    return { party: s.party || [], combat: s.combat || {}, maps: s.maps || {}, trackerPage: s.trackerPage || {}, sceneOrder: s.sceneOrder || {} };
   }
 
-  const SHARED_KEYS = ['party', 'combat', 'maps', 'trackerPage'];
+  const SHARED_KEYS = ['party', 'combat', 'maps', 'trackerPage', 'sceneOrder'];
 
   return { OPS, PLAYER_OPS, apply, permits, playerView, forPlayers, sharedSlice, SHARED_KEYS, ownsInstance, companionFor };
 });

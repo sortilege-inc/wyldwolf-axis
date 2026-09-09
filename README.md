@@ -23,12 +23,12 @@ At 900px and wider the main area is a **tile layout**: rows or columns of panels
 one level, at most three per group, resizable by dragging the gutters. The default is
 three columns — Adventure Tracker · Scene / Encounter · (Inspector over Rules Glossary).
 The sidebar switches presets and opens a tree editor; each tile's header has a picker to
-swap what it shows. Any panel not on screen opens in a drawer from the sidebar. Below
+swap what it shows. The ☰ button collapses the sidebar (remembered per browser). Any panel not on screen opens in a drawer from the sidebar. Below
 900px it falls back to one panel at a time.
 
 | Panel | What it is |
 |---|---|
-| **Adventure Tracker** | Progress, GM-state export/import, and the phase-grouped scene picker (Arrival / Investigation / The Ritual / Epilogue, 11 scenes). |
+| **Adventure Tracker** | Progress, GM-state export/import, and the scene list by phase (Arrival / Investigation / The Ritual / Epilogue, 11 scenes) — drag rows to run the adventure in your own order; the order is shared so the table and players page the same way; "Restore source order" puts the book's back. |
 | **Scene / Encounter** | The current scene: read-aloud text, checks, clues, opponents, objectives, resolutions, a done checkbox and GM notes. **Run Encounter** turns it into the combat panel: initiative, rounds and turns, per-instance HP, conditions with durations, an active-effects sidebar, attack rolls and spell text from stat blocks, and a creature search over all 335 adversaries to add more. |
 | **Inspector** | Whatever was last selected — a combatant, an opponent, a location, a party member, or any catalog entry — with live HP/conditions for combatants. |
 | **Party** | Characters imported from D&D Beyond share links (one-time snapshot, explicit re-sync) and their sheets as played: HP and temp HP, death saves, inspiration, conditions, spell slots and class resources as clickable pips, item charges and quantities, short/long rest, roll buttons for checks, saves, skills, attacks, spells (consuming a slot), and companions/familiars/wild shapes that can be summoned into the running encounter as their own combatants. Party-file export/import. |

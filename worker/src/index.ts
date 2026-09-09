@@ -31,6 +31,7 @@ interface Doc {
   combat: Record<string, any>;
   maps: Record<string, any>;
   trackerPage: Record<string, number>;
+  sceneOrder: Record<string, string[]>;
 }
 
 const IDLE_MS = 14 * 24 * 60 * 60 * 1000;
@@ -197,7 +198,7 @@ export class SessionRoom extends DurableObject<Env> {
       case 'init': {
         if (att.role !== 'gm') return this.sendTo(ws, { type: 'error', message: 'only the GM can seed a session' });
         if (this.get('doc') && !msg.force) return this.sendTo(ws, this.snapshotFor(att));
-        const doc: Doc = { party: msg.doc?.party || [], combat: msg.doc?.combat || {}, maps: msg.doc?.maps || {}, trackerPage: msg.doc?.trackerPage || {} };
+        const doc: Doc = { party: msg.doc?.party || [], combat: msg.doc?.combat || {}, maps: msg.doc?.maps || {}, trackerPage: msg.doc?.trackerPage || {}, sceneOrder: msg.doc?.sceneOrder || {} };
         this.put('doc', doc);
         this.broadcast((a) => this.snapshotFor(a));
         return;

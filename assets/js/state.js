@@ -34,6 +34,8 @@ window.AxisState = (function () {
       layout: null,
       // sceneHash -> { image, w, h, grid, tokens, effects, fog }. Shared.
       maps: {},
+      // adventureId -> [sceneHash…], the GM's own page order. Shared.
+      sceneOrder: {},
     };
   }
 
@@ -262,6 +264,12 @@ window.AxisState = (function () {
 
   const setTrackerPage = (adventureId, idx) => commit('setTrackerPage', [adventureId, idx]);
 
+  function sceneOrder(adventureId) {
+    return (state.sceneOrder || {})[adventureId] || null;
+  }
+
+  const setSceneOrder = (adventureId, hashes) => commit('setSceneOrder', [adventureId, hashes]);
+
   // ── combat (shared) ────────────────────────────────────────────────
   function combatState(adventureId, sceneHash) {
     const adv = state.combat[adventureId] || {};
@@ -349,7 +357,7 @@ window.AxisState = (function () {
     loadPartyFile, exportPartyFile,
     encounterOverride, setEncounterOverride, exportGmStateFile, loadGmStateFile,
     layout, setLayout,
-    trackerPage, setTrackerPage,
+    trackerPage, setTrackerPage, sceneOrder, setSceneOrder,
     combatState, setCombatState, clearCombatState,
     addCombatInstance, removeCombatInstance, setInstanceHp, setInstanceInitiative, setInstanceNotes,
     addInstanceCondition, removeInstanceCondition, tickDurations,
