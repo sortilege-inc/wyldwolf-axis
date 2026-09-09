@@ -17,7 +17,7 @@ window.AxisLayout = (function () {
   const MAX_CHILDREN = 3;
 
   const PRESETS = {
-    table: { name: 'GM table', tree: { dir: 'row', children: ['tracker', 'scene', { dir: 'col', children: ['inspector', 'rules'] }] } },
+    table: { name: 'GM table', tree: { dir: 'row', children: ['tracker', 'scene', { dir: 'col', children: ['inspector', 'rules'] }], weights: [3, 5, 2] } },
     combat: { name: 'Combat', tree: { dir: 'row', children: ['scene', { dir: 'col', children: ['inspector', 'party'] }], weights: [2, 1] } },
     reading: { name: 'Reading', tree: { dir: 'row', children: ['tracker', 'scene'] } },
     single: { name: 'Single panel', tree: { dir: 'row', children: ['dashboard'] } },

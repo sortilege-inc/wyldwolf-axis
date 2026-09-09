@@ -96,6 +96,20 @@ noted on the sheet as best-effort like AC.
   player rule for summoning (args[3] for a 3-arg op), caught by the Node
   unit test before it reached a browser.
 
+- **Scene list, layout weights, PDF import** (2026-09-09). Scene rows get
+  a done checkbox; the default preset is 30/50/20. D&D Beyond PDF import:
+  first built as a positioned-text parser calibrated on `pdftotext -bbox`
+  (worked in Node on both sample sheets), then found pdf.js's text layer
+  holds only the template labels — the values are *widget annotations
+  with field names*. Rewrote the parser around that field map; it is
+  simpler and exact. Verified in Node (pdfjs-dist harness in the
+  scratchpad reads the same annotations the browser does) and in the
+  browser through the real File path: Warlock 9 (34 spells, pact 2×L5, DC
+  18/+10, attuned items) and Paladin 9 (slots 4/3/2, DC 13/+5, smites
+  with saves) both correct; sheet renders with pips, attack buttons,
+  corpus spell text; a roll logs. Sample PDFs are git-ignored (they name
+  a real player).
+
 ## Panel split
 
 Today's Adventure Tracker is both navigation and the scene page. It becomes:

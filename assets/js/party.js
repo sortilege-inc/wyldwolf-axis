@@ -7,7 +7,21 @@ window.AxisParty = (function () {
   const Ddb = window.AxisDdbImport;
   const Sheet = window.AxisSheet;
 
+  // A character imported from a PDF re-syncs from a new PDF; one from a
+  // share link re-fetches through the Worker.
   async function resync(member) {
+    if (member.snapshot.importedFrom === 'pdf') {
+      pickPdf(async (file) => {
+        try {
+          const snapshot = await window.AxisDdbPdf.fromFile(file);
+          State.resyncPartyMember(member.id, snapshot);
+          rerender();
+        } catch (e) {
+          alert('Re-sync failed: ' + e.message);
+        }
+      });
+      return;
+    }
     if (!confirm(`Re-sync ${member.snapshot.name} from D&D Beyond? This overwrites the imported snapshot (HP, conditions, notes and resources you've tracked here are kept).`)) return;
     try {
       const snapshot = await Ddb.importByLink(member.snapshot.ddbId);
@@ -16,6 +30,18 @@ window.AxisParty = (function () {
     } catch (e) {
       alert('Re-sync failed: ' + e.message);
     }
+  }
+
+  function pickPdf(onFile) {
+    const input = el('input', { type: 'file', accept: 'application/pdf,.pdf', class: 'file-input-hidden' });
+    input.hidden = true;
+    input.addEventListener('change', () => {
+      const f = input.files[0];
+      input.remove();
+      if (f) onFile(f);
+    });
+    document.body.appendChild(input);
+    input.click();
   }
 
   function removeMember(member) {
@@ -74,7 +100,21 @@ window.AxisParty = (function () {
         addBtn.disabled = false;
       }
     });
-    const addRow = el('div', { class: 'import-row' }, [linkInput, addBtn]);
+    const pdfBtn = el('button', { class: 'btn btn-ghost', title: 'D&D Beyond → Export → PDF' }, ['Import PDF']);
+    pdfBtn.addEventListener('click', () => {
+      pickPdf(async (file) => {
+        addStatus.textContent = `Reading ${file.name}…`;
+        try {
+          const snapshot = await window.AxisDdbPdf.fromFile(file);
+          State.addPartyMember(snapshot);
+          addStatus.textContent = `Imported ${snapshot.name} from PDF.`;
+          rerender();
+        } catch (e) {
+          addStatus.textContent = 'PDF import failed: ' + e.message;
+        }
+      });
+    });
+    const addRow = el('div', { class: 'import-row' }, [linkInput, addBtn, pdfBtn]);
 
     const exportBtn = el('button', { class: 'btn btn-ghost' }, ['Export party file']);
     exportBtn.addEventListener('click', () => downloadJson(State.exportPartyFile(), 'wyldwolf-axis-party.json'));
@@ -122,5 +162,5 @@ window.AxisParty = (function () {
     container.appendChild(grid);
   }
 
-  return { render, openSheet };
+  return { render, openSheet, pickPdf };
 })();

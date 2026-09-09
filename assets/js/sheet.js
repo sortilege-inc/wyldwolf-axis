@@ -312,9 +312,15 @@ window.AxisSheet = (function () {
       redraw();
     }
 
+    // A PDF import has no spell text; the corpus does, verbatim.
+    function corpusSpellText(name) {
+      const row = ((window.AXIS && window.AXIS.spells) || []).find((r) => r.name.toLowerCase() === String(name).toLowerCase());
+      return row && row.properties ? row.properties.Description || '' : '';
+    }
+
     function spellRow(sp) {
       const name = el('button', { class: 'sel-link fname', type: 'button' }, [sp.name]);
-      const desc = el('div', { class: 'action-desc', html: markdownish(sp.description || '') });
+      const desc = el('div', { class: 'action-desc', html: markdownish(sp.description || corpusSpellText(sp.name) || '') });
       desc.hidden = true;
       name.addEventListener('click', () => { desc.hidden = !desc.hidden; });
       const tags = [sp.prepared ? 'prepared' : null, sp.concentration ? 'concentration' : null, sp.ritual ? 'ritual' : null, sp.activation !== 'action' ? sp.activation : null].filter(Boolean).join(' · ');

@@ -239,8 +239,13 @@ window.AxisTracker = (function () {
           phaseCursor = p.phaseName;
           pickerWrap.appendChild(el('div', { class: 'page-picker-phase' }, [phaseCursor]));
         }
+        const done = el('input', { type: 'checkbox', class: 'scene-row-done', title: 'Mark done' });
+        done.checked = State.sceneState(adventureId, p.scene.hash).done;
+        done.addEventListener('click', (e) => e.stopPropagation());
+        done.addEventListener('change', () => State.setSceneDone(adventureId, p.scene.hash, done.checked));
         const row = el('div', { class: 'scene-row', draggable: 'true', title: 'Drag to reorder' }, [
           el('span', { class: 'scene-grip' }, ['⋮⋮']),
+          done,
           el('span', { class: 'page-dot' }, [String(idx + 1)]),
           el('span', { class: 'scene-row-name' }, [p.scene.name]),
           p.scene.type ? el('span', { class: 'scene-row-type' }, [p.scene.type]) : null,
@@ -296,8 +301,11 @@ window.AxisTracker = (function () {
       progLabel.textContent = `${prog.done} / ${prog.total} scenes marked done`;
       progBar.style.width = `${totalScenes ? (100 * prog.done) / totalScenes : 0}%`;
       Array.from(pickerWrap.querySelectorAll('.scene-row')).forEach((r, i) => {
+        const isDone = State.sceneState(adventureId, pages[i].scene.hash).done;
         r.classList.toggle('active', i === idx);
-        r.classList.toggle('done', State.sceneState(adventureId, pages[i].scene.hash).done);
+        r.classList.toggle('done', isDone);
+        const cb = r.querySelector('.scene-row-done');
+        if (cb) cb.checked = isDone;
       });
       if (!pages.length) {
         pageLabel.textContent = '';

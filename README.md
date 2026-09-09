@@ -31,7 +31,7 @@ swap what it shows. The ☰ button collapses the sidebar (remembered per browser
 | **Adventure Tracker** | Progress, GM-state export/import, and the scene list by phase (Arrival / Investigation / The Ritual / Epilogue, 11 scenes) — drag rows to run the adventure in your own order; the order is shared so the table and players page the same way; "Restore source order" puts the book's back. |
 | **Scene / Encounter** | The current scene: read-aloud text, checks, clues, opponents, objectives, resolutions, a done checkbox and GM notes. **Run Encounter** turns it into the combat panel: initiative, rounds and turns, per-instance HP, conditions with durations, an active-effects sidebar, attack rolls and spell text from stat blocks, and a creature search over all 335 adversaries to add more. |
 | **Inspector** | Whatever was last selected — a combatant, an opponent, a location, a party member, or any catalog entry — with live HP/conditions for combatants. |
-| **Party** | Characters imported from D&D Beyond share links (one-time snapshot, explicit re-sync) and their sheets as played: HP and temp HP, death saves, inspiration, conditions, spell slots and class resources as clickable pips, item charges and quantities, short/long rest, roll buttons for checks, saves, skills, attacks, spells (consuming a slot), and companions/familiars/wild shapes that can be summoned into the running encounter as their own combatants. Party-file export/import. |
+| **Party** | Characters imported from D&D Beyond — by share link through the Worker, or from the sheet PDF D&D Beyond exports (**Import PDF**; parsed in the browser, nothing uploaded) — and their sheets as played: HP and temp HP, death saves, inspiration, conditions, spell slots and class resources as clickable pips, item charges and quantities, short/long rest, roll buttons for checks, saves, skills, attacks, spells (consuming a slot), and companions/familiars/wild shapes that can be summoned into the running encounter as their own combatants. Party-file export/import. |
 | **NPCs** | The named cast — profile box(es) plus a stat block where the book prints one. |
 | **Adversaries / Spells / Items / Subclasses / Artifacts / Rules Glossary** | The merged corpus, searchable; Axis content extends the SRD, Mikko extends Axis. |
 | **Lore** | The adventure's narrative and the Axis preview, verbatim, by heading. |
@@ -138,7 +138,8 @@ assets/js/
   tracker.js              Adventure Tracker and Scene panels
   playmode.js             Run Encounter
   sheet.js                the character sheet as played (pips, rolls, rests, companions)
-  party.js  ddb-import.js Party panel and the D&D Beyond mapper
+  party.js  ddb-import.js Party panel and the D&D Beyond API mapper
+  ddb-pdf.js              the D&D Beyond sheet-PDF parser (field map via pdf.js)
   catalog.js  npcs.js  lore.js  dashboard.js
 data/data.js              GENERATED — window.AXIS
 build/                    the generator and its gates
@@ -177,6 +178,11 @@ Nothing in the shell knows the word "Mikko". `panels.js` takes the first key of
 - **Companions**: every entry in D&D Beyond's `creatures[]` (wild shapes, familiar forms,
   beasts, summons) is offered on the sheet; the character's owner decides which to bring
   into an encounter.
+- **PDF import**: D&D Beyond's exported sheet has no AcroForm, but every value is a named
+  widget annotation (`STR`, `ST Wisdom`, `Wpn1 AtkBonus`, `spellName12`…), so `ddb-pdf.js`
+  reads the field map with pdf.js rather than positioned text. Compared with the API it
+  lacks spell text (the sheet shows the corpus's), companions, item descriptions and
+  subclass names; limited uses come from what the sheet prints ("10 / Long Rest").
 
 ## Credit
 
