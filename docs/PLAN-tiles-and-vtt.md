@@ -110,6 +110,23 @@ noted on the sheet as best-effort like AC.
   corpus spell text; a roll logs. Sample PDFs are git-ignored (they name
   a real player).
 
+- **Nesting, roster cards, inspector sheet, creator** (2026-09-09). Scene
+  order entries became `{ h, p }` (a parent link) in depth-first order;
+  drops have before/after/into zones, ⇥/⇤ buttons do the same, depth
+  capped at 3, moves carry a scene's descendants. Encounter rows became
+  cards (kind colour, HP bar, condition-add and the roster editor hidden
+  behind buttons). The Inspector shows the full sheet for a character.
+  The creator derives a snapshot from choices alone using the corpus's
+  progression tables; verified by hand on a Paladin 5 (HP 44, PB 3,
+  attacks +6, slots 4/2, DC 12, Valkyr features at 3, Alert at 4) and
+  through the wizard's own controls in the browser. Judgement calls:
+  origin feat comes from the background as the 2024 rules say; HP uses
+  the die's average after level 1; resources are the numeric progression
+  columns (short rest for Channel Divinity, Focus Points, Second Wind,
+  Action Surge, Bardic Inspiration, Wild Shape; long otherwise); spell
+  attack/save/damage are read from the spell text. The SRD progression
+  stops at 20, so the wizard does too.
+
 ## Panel split
 
 Today's Adventure Tracker is both navigation and the scene page. It becomes:

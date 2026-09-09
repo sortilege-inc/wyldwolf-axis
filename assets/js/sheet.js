@@ -442,8 +442,8 @@ window.AxisSheet = (function () {
       playerNotes,
       player ? null : el('h3', {}, ['GM Notes']),
       player ? null : gmNotes,
-      player ? null : el('div', { class: 'sheet-actions' }, [
-        el('button', { class: 'btn', onclick: () => opts.onResync && opts.onResync(member) }, ['Re-sync from D&D Beyond']),
+      player || opts.inspector ? null : el('div', { class: 'sheet-actions' }, [
+        el('button', { class: 'btn', onclick: () => opts.onResync && opts.onResync(member) }, [s.importedFrom === 'creator' ? 'Edit build / level up' : s.importedFrom === 'pdf' ? 'Re-import from a new PDF' : 'Re-sync from D&D Beyond']),
         el('button', { class: 'btn btn-danger', onclick: () => opts.onRemove && opts.onRemove(member) }, ['Remove from party']),
       ]),
     ].forEach((n) => n && root.appendChild(n));

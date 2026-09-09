@@ -331,9 +331,16 @@ window.AxisPlayMode = (function () {
       renderPicker();
     });
 
+    // "Add combatant" opens the roster editor, which is closed by default
+    const addToggle = el('button', { class: 'btn btn-ghost' }, ['+ Add combatant']);
+    addToggle.addEventListener('click', () => {
+      rosterEditor.hidden = !rosterEditor.hidden;
+      addToggle.classList.toggle('active', !rosterEditor.hidden);
+      if (!rosterEditor.hidden) searchInput.focus();
+    });
     const header = el('div', { class: 'combat-header' }, [
       el('h2', {}, ['Run Encounter: ' + (scene.name || '')]),
-      el('div', { class: 'chiprow' }, [roundLabel, rollAllBtn, sortBtn, nextBtn, endBtn]),
+      el('div', { class: 'chiprow' }, [roundLabel, rollAllBtn, sortBtn, nextBtn, addToggle, endBtn]),
     ]);
 
     // ── roster editor: add a PC or search for a creature ──────────────
@@ -420,8 +427,13 @@ window.AxisPlayMode = (function () {
     typeFilter.addEventListener('change', drawSearch);
     crFilter.addEventListener('change', drawSearch);
 
+    const closeRoster = el('button', { class: 'btn btn-ghost cc-remove', title: 'Close' }, ['✕']);
+    closeRoster.addEventListener('click', () => {
+      rosterEditor.hidden = true;
+      addToggle.classList.remove('active');
+    });
     const rosterEditor = el('div', { class: 'roster-editor' }, [
-      el('h3', {}, ['Add to roster']),
+      el('div', { class: 'roster-editor-head' }, [el('h3', {}, ['Add to roster']), closeRoster]),
       el('div', { class: 'chiprow' }, [addPcSelect]),
       el('div', { class: 'chiprow' }, [searchInput, typeFilter, crFilter]),
       searchResults,
@@ -534,21 +546,40 @@ window.AxisPlayMode = (function () {
         if (window.AxisPanels) window.AxisPanels.select({ kind: 'instance', adventureId, sceneHash: scene.hash, instanceId: inst.instanceId });
       });
 
-      const row = el('div', { class: 'combat-row' + (isCurrent ? ' combat-current' : '') + ' ' + hpStatusClass(inst), 'data-instance': inst.instanceId }, [
-        el('div', { class: 'combat-turn-mark' }, [isCurrent ? '▶' : '']),
-        el('div', { class: 'combat-name' }, [
-          nameBtn,
-          el('span', { class: 'view-sub' }, [' (' + (inst.sourceKind || 'adversary') + ')']),
+      // ── the card ──────────────────────────────────────────────────────
+      const hpCur = window.AxisRender.toInt(inst.hpCurrent);
+      const hpMax = window.AxisRender.toInt(inst.hpMax);
+      const frac = hpMax ? Math.max(0, Math.min(1, (hpCur || 0) / hpMax)) : null;
+      const hpBar = frac != null
+        ? el('div', { class: 'hp-bar' + (frac <= 0.25 ? ' crit' : frac <= 0.5 ? ' bloodied' : '') }, [el('div', { class: 'hp-bar-fill', style: `width:${Math.round(frac * 100)}%` })])
+        : null;
+      removeBtn.textContent = '✕';
+      removeBtn.className = 'btn btn-ghost cc-remove';
+      removeBtn.title = 'Remove from encounter';
+
+      // condition add-row hides behind a small button
+      const condAddRow = el('div', { class: 'chiprow cc-cond-add' }, [condSelect, condDuration, condAddBtn]);
+      condAddRow.hidden = true;
+      const condToggle = el('button', { class: 'chip chip-btn', type: 'button', title: 'Add a condition' }, ['+ condition']);
+      condToggle.addEventListener('click', () => { condAddRow.hidden = !condAddRow.hidden; if (!condAddRow.hidden) condSelect.focus(); });
+
+      const kind = inst.sourceKind || 'adversary';
+      const row = el('div', { class: 'combat-card kind-' + kind + (isCurrent ? ' combat-current' : '') + ' ' + hpStatusClass(inst), 'data-instance': inst.instanceId }, [
+        el('div', { class: 'cc-head' }, [
+          el('div', { class: 'cc-turn' }, [isCurrent ? '▶' : '']),
+          el('div', { class: 'cc-name' }, [nameBtn, el('span', { class: 'cc-kind' }, [kind])]),
+          el('div', { class: 'cc-init', title: 'Initiative' }, [initInput, rollInitBtn]),
+          el('div', { class: 'cc-hp' }, [
+            hpMax != null ? el('div', { class: 'cc-hp-num' }, [`${hpCur != null ? hpCur : '—'}`, el('span', { class: 'cc-hp-max' }, [` / ${hpMax}`])]) : el('div', { class: 'view-sub' }, ['no HP']),
+            hpBar,
+            el('div', { class: 'cc-hp-ctl' }, [hpMinus, hpAmount, hpPlus]),
+          ]),
+          removeBtn,
         ]),
-        el('div', { class: 'combat-init' }, [initInput, rollInitBtn]),
-        el('div', { class: 'combat-hp' }, [
-          inst.hpMax != null ? el('span', {}, [`HP ${inst.hpCurrent} / ${inst.hpMax}`]) : el('span', { class: 'view-sub' }, ['no HP tracked']),
-          hpMinus, hpAmount, hpPlus,
-        ]),
-        el('div', { class: 'combat-actions' }, [...actionButtons, ...spellButtons, removeBtn]),
-        el('div', { class: 'combat-conditions' }, [
-          el('div', { class: 'chiprow' }, condChips),
-          el('div', { class: 'chiprow' }, [condSelect, condDuration, condAddBtn]),
+        el('div', { class: 'cc-body' }, [
+          actionButtons.length || spellButtons.length ? el('div', { class: 'chiprow cc-actions' }, [...actionButtons, ...spellButtons]) : null,
+          el('div', { class: 'chiprow cc-conds' }, [...condChips, condToggle]),
+          condAddRow,
         ]),
       ]);
       return row;
@@ -602,6 +633,7 @@ window.AxisPlayMode = (function () {
     }
 
     renderAll();
+    rosterEditor.hidden = true;
 
     container.appendChild(header);
     container.appendChild(rosterEditor);

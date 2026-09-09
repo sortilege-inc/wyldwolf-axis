@@ -109,7 +109,7 @@ window.AxisPanels = (function () {
         node = el('div', { class: 'inspector-empty' }, ['That combatant is no longer on the roster.']);
       } else if (inst.sourceKind === 'party') {
         const m = (State.state.party || []).find((mm) => mm.id === inst.defRef);
-        node = m ? partySummary(m, inst) : el('div', { class: 'inspector-empty' }, ['Party member not found.']);
+        node = m ? el('div', {}, [liveHeader(inst), window.AxisSheet.characterSheet(m, { inspector: true })]) : el('div', { class: 'inspector-empty' }, ['Party member not found.']);
       } else if (inst.sourceKind === 'companion') {
         const c = State.companionFor(inst.defRef);
         node = c
@@ -128,7 +128,8 @@ window.AxisPanels = (function () {
       node = found ? statBlock(found.name, found.properties, found.features) : el('div', { class: 'inspector-empty' }, ['Unresolved reference ' + sel.ref]);
     } else if (sel.kind === 'party') {
       const m = (State.state.party || []).find((mm) => mm.id === sel.id);
-      node = m ? partySummary(m, null) : el('div', { class: 'inspector-empty' }, ['Party member not found.']);
+      // the full sheet, live: HP, slots and resources are editable here too
+      node = m ? window.AxisSheet.characterSheet(m, { inspector: true }) : el('div', { class: 'inspector-empty' }, ['Party member not found.']);
     } else if (sel.kind === 'entity') {
       const rows = data[sel.bucket] || [];
       const row = rows.find((r) => r.hash === sel.hash) || rows.find((r) => r.name === sel.name);

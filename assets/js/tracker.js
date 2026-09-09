@@ -42,22 +42,29 @@ window.AxisTracker = (function () {
     return Object.keys(advs).find((k) => advs[k] === adventure) || null;
   }
 
-  // The GM may reorder (State.sceneOrder); each scene keeps its source
-  // phase as its label. Scenes missing from a saved order go to the end,
-  // hashes that no longer exist are dropped.
+  // The GM may reorder and nest (State.sceneOrder: [{ h, p }] in
+  // depth-first order). Each scene keeps its source phase as its label;
+  // a child's depth is its parent's + 1 when the parent appears earlier,
+  // otherwise it is a root. Scenes missing from a saved order go to the
+  // end; hashes that no longer exist are dropped.
   function buildPages(adventure) {
-    const base = sourcePages(adventure);
+    const base = sourcePages(adventure).map((p) => Object.assign({ depth: 0, parent: null }, p));
     const id = adventureIdOf(adventure);
     const order = id && State.sceneOrder ? State.sceneOrder(id) : null;
     if (!order || !order.length) return base;
     const byHash = {};
     base.forEach((p) => (byHash[p.scene.hash] = p));
     const out = [];
-    order.forEach((h) => {
-      if (byHash[h]) {
-        out.push(byHash[h]);
-        delete byHash[h];
-      }
+    const depthOf = {};
+    order.forEach((e) => {
+      const h = typeof e === 'string' ? e : e.h;
+      const parent = typeof e === 'string' ? null : e.p || null;
+      const p = byHash[h];
+      if (!p) return;
+      const d = parent && depthOf[parent] != null ? Math.min(3, depthOf[parent] + 1) : 0;
+      depthOf[h] = d;
+      out.push(Object.assign({}, p, { depth: d, parent: d ? parent : null }));
+      delete byHash[h];
     });
     base.forEach((p) => {
       if (byHash[p.scene.hash]) out.push(p);
@@ -221,21 +228,82 @@ window.AxisTracker = (function () {
       refresh();
     }
 
-    function reorder(from, to) {
-      if (from === to || from == null || to == null) return;
+    // The order is a depth-first list of { h, p }. A move takes the
+    // dragged scene WITH its descendants and puts the block before or
+    // after the target (as the target's sibling) or inside it (as its
+    // last child). Nesting is capped at three levels deep.
+    function entriesNow() {
+      return pages.map((p) => ({ h: p.scene.hash, p: p.parent || null }));
+    }
+
+    function subtree(entries, i) {
+      const root = entries[i];
+      const ids = new Set([root.h]);
+      let j = i + 1;
+      while (j < entries.length && entries[j].p && ids.has(entries[j].p)) {
+        ids.add(entries[j].h);
+        j++;
+      }
+      return entries.slice(i, j);
+    }
+
+    function lastOfSubtree(entries, i) {
+      return i + subtree(entries, i).length - 1;
+    }
+
+    function move(from, to, where) {
+      if (from == null || to == null || from === to) return;
       const current = pages[pageIndexFor(adventureId, pages)];
-      const hashes = pages.map((p) => p.scene.hash);
-      const [moved] = hashes.splice(from, 1);
-      hashes.splice(to, 0, moved);
-      State.setSceneOrder(adventureId, hashes);
+      let entries = entriesNow();
+      const block = subtree(entries, from);
+      if (block.some((e) => e.h === entries[to].h)) return; // can't drop into itself
+      const target = entries[to];
+      entries = entries.filter((e) => !block.some((b) => b.h === e.h));
+      const ti = entries.findIndex((e) => e.h === target.h);
+      let parent = target.p || null;
+      let at = ti;
+      if (where === 'after') at = lastOfSubtree(entries, ti) + 1;
+      if (where === 'into') {
+        parent = target.h;
+        at = lastOfSubtree(entries, ti) + 1;
+      }
+      const depthOf = (h) => {
+        let d = 0;
+        let cur = entries.find((e) => e.h === h);
+        while (cur && cur.p) {
+          d++;
+          cur = entries.find((e) => e.h === cur.p);
+        }
+        return d;
+      };
+      if (parent && depthOf(parent) >= 2) parent = entries.find((e) => e.h === parent).p || null; // cap depth
+      block[0].p = parent;
+      entries.splice(at, 0, ...block);
+      State.setSceneOrder(adventureId, entries);
       keepCurrent(current);
+    }
+
+    function indent(idx, dir) {
+      const entries = entriesNow();
+      const me = entries[idx];
+      if (dir > 0) {
+        // become the last child of the previous sibling at my depth
+        for (let i = idx - 1; i >= 0; i--) {
+          if ((entries[i].p || null) === (me.p || null)) return move(idx, i, 'into');
+          if (entries[i].h === me.p) return;
+        }
+      } else if (me.p) {
+        // become a sibling of my parent, placed after its subtree
+        const pi = entries.findIndex((e) => e.h === me.p);
+        move(idx, pi, 'after');
+      }
     }
 
     function buildPicker() {
       pickerWrap.innerHTML = '';
       let phaseCursor = null;
       pages.forEach((p, idx) => {
-        if (p.phaseName !== phaseCursor) {
+        if (p.depth === 0 && p.phaseName !== phaseCursor) {
           phaseCursor = p.phaseName;
           pickerWrap.appendChild(el('div', { class: 'page-picker-phase' }, [phaseCursor]));
         }
@@ -243,12 +311,20 @@ window.AxisTracker = (function () {
         done.checked = State.sceneState(adventureId, p.scene.hash).done;
         done.addEventListener('click', (e) => e.stopPropagation());
         done.addEventListener('change', () => State.setSceneDone(adventureId, p.scene.hash, done.checked));
-        const row = el('div', { class: 'scene-row', draggable: 'true', title: 'Drag to reorder' }, [
+        const outBtn = el('button', { class: 'scene-nest', type: 'button', title: 'Move out of parent' }, ['⇤']);
+        const inBtn = el('button', { class: 'scene-nest', type: 'button', title: 'Nest under the scene above' }, ['⇥']);
+        outBtn.hidden = !p.depth;
+        inBtn.hidden = p.depth >= 3 || idx === 0;
+        outBtn.addEventListener('click', (e) => { e.stopPropagation(); indent(idx, -1); });
+        inBtn.addEventListener('click', (e) => { e.stopPropagation(); indent(idx, 1); });
+        const row = el('div', { class: 'scene-row depth-' + p.depth, draggable: 'true', title: 'Drag to reorder · drop onto a scene to nest under it', style: `--depth:${p.depth}` }, [
           el('span', { class: 'scene-grip' }, ['⋮⋮']),
           done,
           el('span', { class: 'page-dot' }, [String(idx + 1)]),
           el('span', { class: 'scene-row-name' }, [p.scene.name]),
           p.scene.type ? el('span', { class: 'scene-row-type' }, [p.scene.type]) : null,
+          outBtn,
+          inBtn,
         ]);
         row.addEventListener('click', () => goToPage(adventureId, pages, idx));
         row.addEventListener('dragstart', (e) => {
@@ -259,19 +335,27 @@ window.AxisTracker = (function () {
         });
         row.addEventListener('dragend', () => {
           row.classList.remove('dragging');
-          pickerWrap.querySelectorAll('.scene-row.over').forEach((r) => r.classList.remove('over'));
+          pickerWrap.querySelectorAll('.scene-row').forEach((r) => r.classList.remove('over-before', 'over-after', 'over-into'));
         });
+        const zone = (e) => {
+          const r = row.getBoundingClientRect();
+          const f = (e.clientY - r.top) / r.height;
+          return f < 0.3 ? 'before' : f > 0.7 ? 'after' : 'into';
+        };
         row.addEventListener('dragover', (e) => {
           e.preventDefault();
           e.dataTransfer.dropEffect = 'move';
-          row.classList.add('over');
+          const z = zone(e);
+          row.classList.toggle('over-before', z === 'before');
+          row.classList.toggle('over-after', z === 'after');
+          row.classList.toggle('over-into', z === 'into');
         });
-        row.addEventListener('dragleave', () => row.classList.remove('over'));
+        row.addEventListener('dragleave', () => row.classList.remove('over-before', 'over-after', 'over-into'));
         row.addEventListener('drop', (e) => {
           e.preventDefault();
           const from = dragFrom != null ? dragFrom : parseInt(e.dataTransfer.getData('text/plain'), 10);
           dragFrom = null;
-          reorder(from, idx);
+          move(from, idx, zone(e));
         });
         pickerWrap.appendChild(row);
       });
@@ -374,7 +458,7 @@ window.AxisTracker = (function () {
         runBtn,
       ]);
       const card = el('div', { class: 'scene-card page-scene-card' + (st.done ? ' done' : '') }, [
-        el('div', { class: 'view-sub' }, [`${page.phaseName} — Scene ${idx + 1} of ${pages.length}`]),
+        el('div', { class: 'view-sub' }, [`${page.phaseName} — Scene ${idx + 1} of ${pages.length}${page.parent ? ' · under ' + ((pages.find((q) => q.scene.hash === page.parent) || {}).scene || {}).name : ''}`]),
         header,
       ]);
 

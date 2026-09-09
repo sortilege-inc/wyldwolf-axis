@@ -10,6 +10,11 @@ window.AxisParty = (function () {
   // A character imported from a PDF re-syncs from a new PDF; one from a
   // share link re-fetches through the Worker.
   async function resync(member) {
+    if (member.snapshot.importedFrom === 'creator') {
+      document.querySelectorAll('.drawer-overlay').forEach((o) => o.remove());
+      window.AxisCreator.open(member);
+      return;
+    }
     if (member.snapshot.importedFrom === 'pdf') {
       pickPdf(async (file) => {
         try {
@@ -114,7 +119,9 @@ window.AxisParty = (function () {
         }
       });
     });
-    const addRow = el('div', { class: 'import-row' }, [linkInput, addBtn, pdfBtn]);
+    const createBtn = el('button', { class: 'btn' }, ['Create character']);
+    createBtn.addEventListener('click', () => window.AxisCreator.open(null));
+    const addRow = el('div', { class: 'import-row' }, [linkInput, addBtn, pdfBtn, createBtn]);
 
     const exportBtn = el('button', { class: 'btn btn-ghost' }, ['Export party file']);
     exportBtn.addEventListener('click', () => downloadJson(State.exportPartyFile(), 'wyldwolf-axis-party.json'));
@@ -162,5 +169,5 @@ window.AxisParty = (function () {
     container.appendChild(grid);
   }
 
-  return { render, openSheet, pickPdf };
+  return { render, openSheet, pickPdf, rerender };
 })();

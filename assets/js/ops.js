@@ -202,11 +202,12 @@
       if (!s.trackerPage) s.trackerPage = {};
       s.trackerPage[adventureId] = pageIndex;
     },
-    // GM's own scene order (array of scene hashes); null restores the
-    // source's. Shared so every window pages the same way.
-    setSceneOrder(s, adventureId, hashes) {
+    // GM's own scene order: [{ h: sceneHash, p: parentHash|null }] in
+    // depth-first order (a bare hash array is accepted as all roots);
+    // null restores the source's. Shared so every window pages the same.
+    setSceneOrder(s, adventureId, entries) {
       if (!s.sceneOrder) s.sceneOrder = {};
-      if (hashes) s.sceneOrder[adventureId] = hashes;
+      if (entries) s.sceneOrder[adventureId] = entries.map((e) => (typeof e === 'string' ? { h: e, p: null } : { h: e.h, p: e.p || null }));
       else delete s.sceneOrder[adventureId];
     },
   };

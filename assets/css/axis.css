@@ -177,6 +177,69 @@ body.sidebar-collapsed .tile-group > .tile-group:first-child > .tile:first-child
 .scene-row-type { font-size: 0.7rem; color: var(--frost-dim); text-transform: uppercase; letter-spacing: 0.04em; }
 .scene-grip { color: var(--frost-dim); cursor: grab; font-size: 0.8rem; letter-spacing: -0.15em; }
 .scene-row.dragging .scene-grip { cursor: grabbing; }
+.scene-row { padding-left: calc(0.4rem + var(--depth, 0) * 1.3rem); }
+.scene-row.depth-1 .page-dot, .scene-row.depth-2 .page-dot, .scene-row.depth-3 .page-dot { color: var(--frost-dim); }
+.scene-row.over-before { border-top: 2px solid var(--teal); }
+.scene-row.over-after { border-bottom: 2px solid var(--teal); }
+.scene-row.over-into { background: rgba(62, 207, 201, 0.12); border-color: var(--teal-dim); }
+.scene-nest { background: none; border: 1px solid transparent; color: var(--frost-dim); cursor: pointer; font-size: 0.85rem; padding: 0 0.2rem; border-radius: 3px; opacity: 0; }
+.scene-row:hover .scene-nest { opacity: 1; }
+.scene-nest:hover { color: var(--teal); border-color: var(--teal-dim); }
+
+/* ── Encounter roster cards (playmode.js) ──────────────── */
+
+.combat-card {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--frost-dim);
+  background: var(--ink-2);
+  border-radius: 4px;
+  padding: 0.45rem 0.6rem 0.4rem;
+  margin-bottom: 0.45rem;
+}
+.combat-card.kind-party { border-left-color: var(--teal); }
+.combat-card.kind-companion { border-left-color: #8fd9d4; }
+.combat-card.kind-npc { border-left-color: var(--gold); }
+.combat-card.kind-adversary { border-left-color: var(--danger); }
+.combat-card.combat-current { background: var(--ink-3); box-shadow: inset 0 0 0 1px var(--teal-dim); }
+.combat-card.combatant-dead { opacity: 0.5; }
+.combat-card.combatant-dead .combat-name-btn { text-decoration: line-through; }
+.cc-head { display: grid; grid-template-columns: 1rem minmax(8rem, 1.4fr) auto minmax(10rem, 1fr) auto; gap: 0.6rem; align-items: center; }
+.cc-turn { grid-row: 1; }
+.cc-remove { grid-column: -1; grid-row: 1; }
+.cc-turn { color: var(--teal); font-size: 0.8rem; }
+.cc-name { display: flex; align-items: baseline; gap: 0.4rem; min-width: 0; }
+.cc-name .combat-name-btn { font-family: var(--font-display); font-size: 1.05rem; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-kind { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--frost-dim); }
+.cc-init { display: flex; align-items: center; gap: 0.2rem; }
+.cc-init .hp-current-input { width: 3.2rem; }
+.cc-hp { display: grid; grid-template-columns: auto 1fr auto; gap: 0.4rem; align-items: center; }
+.cc-hp-num { font-family: var(--font-mono); font-size: 1rem; color: var(--paper); white-space: nowrap; }
+.cc-hp-max { color: var(--frost-dim); font-size: 0.8rem; }
+.hp-bar { height: 6px; background: var(--ink); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; min-width: 3rem; }
+.hp-bar-fill { height: 100%; background: var(--teal-dim); }
+.hp-bar.bloodied .hp-bar-fill { background: var(--gold-dim); }
+.hp-bar.crit .hp-bar-fill { background: var(--danger-bright); }
+.cc-hp-ctl { display: flex; align-items: center; gap: 0.15rem; }
+.cc-hp-ctl .hp-btn { padding: 0.15rem 0.45rem; }
+.cc-hp-ctl .hp-amount { width: 2.8rem; }
+.cc-remove { padding: 0.1rem 0.4rem; color: var(--frost-dim); border-color: transparent; }
+.cc-remove:hover { color: var(--danger-bright); border-color: var(--danger); }
+.cc-body { margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.cc-actions .btn { padding: 0.15rem 0.5rem; font-size: 0.78rem; }
+.cc-conds { align-items: center; }
+.chip-btn { cursor: pointer; background: none; font: inherit; font-size: 0.75rem; }
+.chip-btn:hover { border-color: var(--teal-dim); color: var(--teal); }
+.cc-cond-add { padding-left: 1.2rem; }
+.roster-editor-head { display: flex; align-items: center; justify-content: space-between; }
+.roster-editor-head h3 { margin: 0; }
+.btn.active { border-color: var(--teal); color: var(--paper); background: var(--ink-3); }
+@container (max-width: 640px) {
+  .cc-head { grid-template-columns: 1rem 1fr auto; row-gap: 0.3rem; }
+  .cc-name { flex-wrap: wrap; }
+  .cc-name .combat-name-btn { white-space: normal; text-align: left; }
+  .cc-init { grid-column: 2 / 3; }
+  .cc-hp { grid-column: 1 / -1; }
+}
 
 /* ── Tile layout (layout.js) ───────────────────────────── */
 
@@ -351,6 +414,32 @@ body.play { min-height: 100vh; }
   .play-main { padding: 0.6rem; }
   .abilities-row { flex-wrap: wrap; }
 }
+
+/* ── Character creator (creator.js) ────────────────────── */
+
+.creator { min-width: min(880px, 90vw); }
+.creator-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.creator-summary { background: var(--ink-3); border: 1px solid var(--line); border-radius: 4px; padding: 0.5rem 0.8rem; min-width: 280px; }
+.cs-name { font-family: var(--font-display); font-size: 1.2rem; color: var(--gold); }
+.cs-grid { display: flex; gap: 0.3rem; margin: 0.4rem 0; }
+.cs-grid .ability-box { padding: 0.2rem 0.4rem; min-width: 0; }
+.cs-grid .ability-box .val { font-size: 0.85rem; }
+.creator-steps { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.8rem 0; }
+.creator-step { background: none; border: 1px solid var(--line); color: var(--frost); font-family: var(--font-body); font-size: 0.85rem; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; }
+.creator-step.active { border-color: var(--teal); color: var(--teal); background: var(--ink-3); }
+.creator-body { min-height: 300px; }
+.creator-nav { justify-content: space-between; margin-top: 1rem; }
+.creator-field { display: flex; align-items: center; gap: 0.6rem; margin: 0.4rem 0; }
+.creator-field .cf-label, .cf-label { min-width: 8rem; color: var(--gold); font-family: var(--font-display); font-size: 0.9rem; letter-spacing: 0.04em; }
+.creator-field .searchbar { max-width: none; flex: 1; }
+.creator-scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.4rem; margin: 0.5rem 0; }
+.creator-score { display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; background: var(--ink-2); border: 1px solid var(--line); border-radius: 3px; padding: 0.3rem 0.5rem; }
+.creator-score .searchbar { max-width: 8rem; }
+.creator-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.5rem; margin-bottom: 0.6rem; }
+.pick-card.active { border-color: var(--teal); background: var(--ink-3); }
+.creator-detail { border: 1px solid var(--line); background: var(--ink-2); border-radius: 4px; padding: 0.6rem 0.8rem; margin: 0.6rem 0; }
+.creator-detail h3 { margin-top: 0; }
+.creator-spells { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; max-height: 50vh; overflow: auto; }
 
 /* ── Character sheet (sheet.js) ─────────────────────────── */
 

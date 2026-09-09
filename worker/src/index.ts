@@ -31,7 +31,7 @@ interface Doc {
   combat: Record<string, any>;
   maps: Record<string, any>;
   trackerPage: Record<string, number>;
-  sceneOrder: Record<string, string[]>;
+  sceneOrder: Record<string, unknown[]>;
 }
 
 const IDLE_MS = 14 * 24 * 60 * 60 * 1000;
