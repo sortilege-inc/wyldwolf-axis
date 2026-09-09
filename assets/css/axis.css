@@ -356,6 +356,28 @@ main.view.tiles-mode {
   padding: 1rem 1.2rem 2rem;
 }
 .tile .view-header h1 { font-size: 1.45rem; }
+.tile.focused .tile-head { box-shadow: inset 0 -1px 0 var(--teal-dim); }
+.tile-tabs { display: flex; gap: 0.15rem; min-width: 0; overflow-x: auto; }
+.tile-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--frost-dim);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tile-tab:hover { color: var(--frost); border-color: var(--line); }
+.tile-tab.on { color: var(--gold); background: var(--ink-3); border-color: var(--line); }
+.tile-tab-x { background: none; border: none; color: var(--frost-dim); font-size: 0.7rem; padding: 0 0.1rem; cursor: pointer; line-height: 1; }
+.tile-tab-x:hover { color: var(--danger-bright); }
 .tile-collapse {
   background: none;
   border: 1px solid transparent;

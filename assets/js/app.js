@@ -175,7 +175,9 @@
     }
   }
   toggle.addEventListener('click', () => setCollapsed(!document.body.classList.contains('sidebar-collapsed')));
-  setCollapsed(!!uiPref().sidebarCollapsed);
+  // starts closed; a click either way is remembered
+  const pref = uiPref();
+  setCollapsed(pref.sidebarCollapsed == null ? true : !!pref.sidebarCollapsed);
 
   window.addEventListener('resize', applyMode);
   // Devtools viewport emulation changes innerWidth without a resize event;

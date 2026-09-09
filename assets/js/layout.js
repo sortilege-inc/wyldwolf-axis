@@ -25,14 +25,29 @@ window.AxisLayout = (function () {
   const DEFAULT_PRESET = 'table';
 
   function isGroup(node) {
-    return node && typeof node === 'object';
+    return !!(node && typeof node === 'object' && Array.isArray(node.children));
+  }
+
+  // A leaf is a panel id, or a tab set { panels: [ids], active: i } — the
+  // sidebar adds panels to a tile as tabs rather than floating them.
+  function leafPanels(leaf) {
+    return typeof leaf === 'string' ? [leaf] : leaf.panels || [];
+  }
+  function leafActive(leaf) {
+    if (typeof leaf === 'string') return leaf;
+    const i = Math.min(leaf.active || 0, leaf.panels.length - 1);
+    return leaf.panels[i];
   }
 
   function validate(tree) {
     const errors = [];
     function walk(node, depth, path) {
       if (!isGroup(node)) {
-        if (!Panels.PANELS[node]) errors.push(`${path}: unknown panel "${node}"`);
+        const panels = leafPanels(node);
+        if (!panels.length) errors.push(`${path}: empty tile`);
+        panels.forEach((id) => {
+          if (!Panels.PANELS[id]) errors.push(`${path}: unknown panel "${id}"`);
+        });
         return;
       }
       if (node.dir !== 'row' && node.dir !== 'col') errors.push(`${path}: dir must be row or col`);
@@ -62,12 +77,23 @@ window.AxisLayout = (function () {
   }
 
   // ── rendering ──────────────────────────────────────────────────────
-  let mounts = []; // { id, ctx, tile }
+  let mounts = []; // { id, ctx, tile, parent, index }
   let rootEl = null;
   let tree = null;
+  let focused = null; // { parent, index } — the tile the GM last clicked in
 
   function mounted() {
     return mounts.map((m) => m.id);
+  }
+
+  // every panel held as a tab anywhere, active or not
+  function present() {
+    const out = [];
+    (function walk(node) {
+      if (isGroup(node)) node.children.forEach(walk);
+      else leafPanels(node).forEach((id) => out.push(id));
+    })(tree || currentTree());
+    return out;
   }
 
   function teardown() {
@@ -101,7 +127,8 @@ window.AxisLayout = (function () {
 
   function labelOf(node) {
     if (isGroup(node)) return node.children.map(labelOf).join(' · ');
-    return Panels.PANELS[node] ? Panels.PANELS[node].label : node;
+    const id = leafActive(node);
+    return Panels.PANELS[id] ? Panels.PANELS[id].label : id;
   }
 
   function buildRail(child, i) {
@@ -125,16 +152,19 @@ window.AxisLayout = (function () {
     return g;
   }
 
-  function buildTile(id, parent, index, rootIndex) {
+  function buildTile(leaf, parent, index, rootIndex) {
+    const panels = leafPanels(leaf);
+    const id = leafActive(leaf);
     const body = el('div', { class: 'tile-body' });
-    const picker = el('select', { class: 'tile-picker', title: 'Change this tile' });
+    const picker = el('select', { class: 'tile-picker', title: 'Change this tab' });
     Panels.list().forEach((p) => {
       const o = el('option', { value: p.id }, [p.label]);
       if (p.id === id) o.selected = true;
       picker.appendChild(o);
     });
     picker.addEventListener('change', () => {
-      parent.children[index] = picker.value;
+      if (typeof parent.children[index] === 'string') parent.children[index] = picker.value;
+      else parent.children[index].panels[parent.children[index].active || 0] = picker.value;
       State.setLayout(tree);
       render(rootEl);
     });
@@ -142,14 +172,74 @@ window.AxisLayout = (function () {
     const collapse = el('button', { class: 'tile-collapse', type: 'button', title: 'Collapse this column' }, [tree.dir === 'row' ? '◂' : '▴']);
     collapse.hidden = rootIndex == null || tree.children.length < 2;
     collapse.addEventListener('click', () => setCollapsed(rootIndex, true));
-    const tile = el('div', { class: 'tile', 'data-panel': id }, [
-      el('div', { class: 'tile-head' }, [el('span', {}, [Panels.PANELS[id] ? Panels.PANELS[id].label : id]), picker, collapse]),
+
+    // tabs when the tile holds more than one panel
+    let title;
+    if (panels.length > 1) {
+      title = el('div', { class: 'tile-tabs' }, panels.map((pid, i) => {
+        const close = el('button', { class: 'tile-tab-x', type: 'button', title: 'Close' }, ['✕']);
+        close.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeTab(parent, index, i);
+        });
+        const t = el('button', { class: 'tile-tab' + (pid === id ? ' on' : ''), type: 'button' }, [Panels.PANELS[pid] ? Panels.PANELS[pid].label : pid, close]);
+        t.addEventListener('click', () => {
+          parent.children[index].active = i;
+          State.setLayout(tree);
+          render(rootEl);
+        });
+        return t;
+      }));
+    } else {
+      title = el('span', {}, [Panels.PANELS[id] ? Panels.PANELS[id].label : id]);
+    }
+    const isFocused = focused && focused.parent === parent && focused.index === index;
+    const tile = el('div', { class: 'tile' + (isFocused ? ' focused' : ''), 'data-panel': id }, [
+      el('div', { class: 'tile-head' }, [title, picker, collapse]),
       body,
     ]);
+    tile.addEventListener('pointerdown', () => setFocus(parent, index, tile), true);
     const ctx = Panels.makeCtx();
-    mounts.push({ id, ctx, tile });
+    mounts.push({ id, ctx, tile, parent, index });
     Panels.mount(body, id, ctx);
     return tile;
+  }
+
+  function setFocus(parent, index, tile) {
+    if (focused && focused.parent === parent && focused.index === index) return;
+    focused = { parent, index };
+    if (rootEl) rootEl.querySelectorAll('.tile.focused').forEach((t) => t.classList.remove('focused'));
+    if (tile) tile.classList.add('focused');
+  }
+
+  function closeTab(parent, index, i) {
+    const leaf = parent.children[index];
+    if (typeof leaf === 'string' || leaf.panels.length < 2) return;
+    leaf.panels.splice(i, 1);
+    if ((leaf.active || 0) >= leaf.panels.length) leaf.active = leaf.panels.length - 1;
+    else if ((leaf.active || 0) > i) leaf.active -= 1;
+    if (leaf.panels.length === 1) parent.children[index] = leaf.panels[0];
+    State.setLayout(tree);
+    render(rootEl);
+  }
+
+  // The tile an opened panel lands in: the one last clicked, else the
+  // widest root leaf (the scene column in the default layout).
+  function targetTile() {
+    if (focused && focused.parent.children[focused.index] != null) return focused;
+    let best = null;
+    const w = tree.weights || tree.children.map(() => 1);
+    tree.children.forEach((c, i) => {
+      if (isCollapsed(tree, i)) return;
+      if (!isGroup(c) && (!best || w[i] > best.w)) best = { parent: tree, index: i, w: w[i] };
+    });
+    if (best) return best;
+    // no root leaf: first leaf of the first open group
+    for (let i = 0; i < tree.children.length; i++) {
+      const c = tree.children[i];
+      if (isGroup(c) && !isCollapsed(tree, i)) return { parent: c, index: 0 };
+    }
+    return { parent: tree, index: 0 };
   }
 
   // Drag a gutter to trade space between the two siblings it separates.
@@ -196,21 +286,45 @@ window.AxisLayout = (function () {
     root.appendChild(buildGroup(tree, [], null));
   }
 
-  // Bring a panel to the GM's attention: flash it if it's on screen,
-  // otherwise open it in a drawer without disturbing the layout.
+  function flash(tile) {
+    tile.classList.remove('flash');
+    void tile.offsetWidth; // restart the animation
+    tile.classList.add('flash');
+    tile.scrollIntoView({ block: 'nearest' });
+  }
+
+  // Bring a panel to the GM's attention: flash it if it's showing,
+  // switch to it if it's a tab somewhere, otherwise add it as a tab to
+  // the focused tile.
   function open(id) {
     const m = mounts.find((x) => x.id === id);
     if (m) {
-      m.tile.classList.remove('flash');
-      void m.tile.offsetWidth; // restart the animation
-      m.tile.classList.add('flash');
-      m.tile.scrollIntoView({ block: 'nearest' });
+      flash(m.tile);
       return;
     }
-    const body = el('div', { class: 'drawer-panel' });
-    const ctx = Panels.makeCtx();
-    Panels.mount(body, id, ctx);
-    drawer(body, () => ctx.teardown());
+    let hit = null;
+    (function walk(node) {
+      if (hit) return;
+      if (isGroup(node)) {
+        node.children.forEach((c, i) => {
+          if (!hit && !isGroup(c) && leafPanels(c).indexOf(id) !== -1) hit = { parent: node, index: i };
+          else if (!hit && isGroup(c)) walk(c);
+        });
+      }
+    })(tree);
+    if (!hit) {
+      hit = targetTile();
+      const leaf = hit.parent.children[hit.index];
+      hit.parent.children[hit.index] = typeof leaf === 'string' ? { panels: [leaf, id], active: 1 } : { panels: leaf.panels.concat([id]), active: leaf.panels.length };
+    } else {
+      const leaf = hit.parent.children[hit.index];
+      leaf.active = leaf.panels.indexOf(id);
+    }
+    focused = { parent: hit.parent, index: hit.index };
+    State.setLayout(tree);
+    render(rootEl);
+    const now = mounts.find((x) => x.id === id);
+    if (now) flash(now.tile);
   }
 
   function applyPreset(key) {
@@ -289,7 +403,8 @@ window.AxisLayout = (function () {
           box.appendChild(inner);
         } else {
           const row = el('div', { class: 'le-row' }, [
-            panelSelect(c, (v) => { node.children[i] = v; }),
+            panelSelect(leafActive(c), (v) => { node.children[i] = v; }),
+            leafPanels(c).length > 1 ? el('span', { class: 'view-sub' }, [`+ ${leafPanels(c).length - 1} tab${leafPanels(c).length > 2 ? 's' : ''}`]) : null,
             removeBtn(node, i),
           ]);
           box.appendChild(row);
@@ -333,5 +448,5 @@ window.AxisLayout = (function () {
     const overlay = drawer(body);
   }
 
-  return { PRESETS, DEFAULT_PRESET, validate, render, open, applyPreset, editor, mounted, teardown, currentTree, setCollapsed };
+  return { PRESETS, DEFAULT_PRESET, validate, render, open, applyPreset, editor, mounted, present, teardown, currentTree, setCollapsed };
 })();
