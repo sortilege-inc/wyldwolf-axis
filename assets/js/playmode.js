@@ -177,7 +177,8 @@ window.AxisPlayMode = (function () {
     ((scene.conflict && scene.conflict.opponents) || []).forEach((h) => {
       const found = resolveEntity(h, adversaries, npcs);
       if (!found) return;
-      const hpMax = found.properties ? found.properties['Hit Points'] : null;
+      // Hit Points is a string in the corpus; HP arithmetic needs a number.
+      const hpMax = found.properties ? window.AxisRender.toInt(found.properties['Hit Points']) : null;
       const ov = State.encounterOverride(adventureId, scene.hash, h);
       seenSoFar[h] = (seenSoFar[h] || 0) + 1;
       const displayName = nameCounts[h] > 1 ? `${found.name} ${seenSoFar[h]}` : found.name;
@@ -186,7 +187,7 @@ window.AxisPlayMode = (function () {
         sourceKind: found.kind,
         displayName,
         hpMax,
-        hpCurrent: ov.hpCurrent != null ? ov.hpCurrent : hpMax,
+        hpCurrent: ov.hpCurrent != null ? window.AxisRender.toInt(ov.hpCurrent) : hpMax,
         initiative: null,
         conditions: [],
         notes: '',
@@ -382,7 +383,7 @@ window.AxisPlayMode = (function () {
         const cr = a.properties && a.properties['Challenge Rating'] ? a.properties['Challenge Rating'].Printed : null;
         const addBtn = el('button', { class: 'btn' }, ['+ Add']);
         addBtn.addEventListener('click', () => {
-          const hpMax = a.properties ? a.properties['Hit Points'] : null;
+          const hpMax = a.properties ? window.AxisRender.toInt(a.properties['Hit Points']) : null;
           combat = State.combatState(adventureId, scene.hash);
           const name = nextDisplayName(combat, a.name);
           persist();
@@ -439,7 +440,8 @@ window.AxisPlayMode = (function () {
       const hpPlus = el('button', { class: 'btn btn-ghost hp-btn' }, ['+']);
       const hpAmount = el('input', { type: 'number', class: 'hp-current-input hp-amount', value: '1', min: '1' });
       function applyDelta(delta) {
-        const next = Math.max(0, (inst.hpCurrent || 0) + delta);
+        // toInt: instances saved before HP was coerced may still hold "77".
+        const next = Math.max(0, (window.AxisRender.toInt(inst.hpCurrent) || 0) + delta);
         State.setInstanceHp(adventureId, scene.hash, inst.instanceId, next);
         combat = State.combatState(adventureId, scene.hash);
         renderTable();
@@ -509,10 +511,17 @@ window.AxisPlayMode = (function () {
         renderAll();
       });
 
-      const row = el('div', { class: 'combat-row' + (isCurrent ? ' combat-current' : '') + ' ' + hpStatusClass(inst) }, [
+      // Name is a selection target: the Inspector tile (and a VTT token,
+      // later) follow it.
+      const nameBtn = el('button', { class: 'sel-link combat-name-btn', type: 'button' }, [inst.displayName]);
+      nameBtn.addEventListener('click', () => {
+        if (window.AxisPanels) window.AxisPanels.select({ kind: 'instance', adventureId, sceneHash: scene.hash, instanceId: inst.instanceId });
+      });
+
+      const row = el('div', { class: 'combat-row' + (isCurrent ? ' combat-current' : '') + ' ' + hpStatusClass(inst), 'data-instance': inst.instanceId }, [
         el('div', { class: 'combat-turn-mark' }, [isCurrent ? '▶' : '']),
         el('div', { class: 'combat-name' }, [
-          inst.displayName,
+          nameBtn,
           el('span', { class: 'view-sub' }, [inst.sourceKind === 'party' ? ' (party)' : inst.sourceKind === 'npc' ? ' (npc)' : ' (adversary)']),
         ]),
         el('div', { class: 'combat-init' }, [initInput, rollInitBtn]),

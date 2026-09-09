@@ -1,0 +1,85 @@
+# Plan: tile layout, cross-window sync, VTT
+
+Decision log for the third feature block. Owner decisions are marked
+**(owner)**; everything else is a method call made while building and is
+reported here for audit.
+
+## Scope (settled 2026-09-08)
+
+1. **Tile layout** for the main page. Layout tree `{dir: row|col, children}`;
+   leaves are panels from a registry. Constraints: at most 3 children at the
+   root, groups nest exactly one level, a group cannot contain a group.
+   Default: `row[tracker, scene, col[inspector, glossary]]` **(owner)**.
+   Editor: named presets plus a simple tree editor (dropdowns, add/remove),
+   no drag-and-drop **(owner)**. Below ~900px the page falls back to the
+   single-panel nav that exists today.
+2. **Cross-window sync**: `BroadcastChannel` on top of the localStorage state
+   that already exists; same browser, same machine. Transport is swappable so
+   a server can be added later without touching panels. A **player view**
+   window (no GM information, fog/visibility layer) is in scope now
+   **(owner)**; cross-device sync is not.
+3. **VTT window** (`vtt.html`): SVG with `viewBox` pan/zoom. Layers:
+   background image, grid, fog, effects, tokens. Tokens bind to combat
+   instances by `instanceId`, so HP/bloodied/dead/conditions come from the
+   encounter state — there is no second HP system. Grid is calibrated per map
+   in the UI (cell size + offset, live overlay) **(owner)**; default guess is
+   96px cells on the 4K infirmary still. Token art defaults to a themed
+   initials disc; per-token images later.
+4. **Effects**: AoE templates (circle/cone/line/square, sized in cells),
+   pings, and right-click on a token to apply conditions/damage from the map,
+   syncing back to the encounter panel **(owner)**.
+
+Order: layout → bus → VTT → effects. One commit each; each verified in the
+browser by the main session, not by a delegated agent's report.
+
+## Panel split
+
+Today's Adventure Tracker is both navigation and the scene page. It becomes:
+
+- `tracker` — adventure overview, progress, phase/scene picker
+- `scene` — the current scene's text and Run Encounter
+- `inspector` — whatever is selected: a combatant instance, NPC, location,
+  item; empty state explains itself
+- `glossary` — rules glossary with search
+
+"Current scene" and "current selection" become shared app state and travel
+over the bus, so a token click in the VTT selects that combatant in the
+Inspector.
+
+## Log
+
+- **Layout + bus landed** (2026-09-08). Verified in-browser at 1400px: default
+  preset, per-tile scroll, picker → scene sync, location/opponent/glossary/
+  combatant selection into the Inspector, gutter drag persisted as weights,
+  preset switch, tree editor, drawer for unmounted panels, narrow fallback.
+  Cross-window, two tabs: HP − in A → B's Inspector showed 76/77 (selection
+  crossed too); "done" checkbox in B → A's progress, picker dot and scene
+  card updated. No reloads.
+- **Bug found while verifying, pre-existing:** `Hit Points` is a string in
+  the corpus, so the −/+ HP buttons did `"77" + (-1)` → `"77-1"` →
+  `Math.max` → NaN for every stat-block-seeded combatant. Both earlier
+  smoke tests drove HP through the API with numbers and never pressed the
+  button on an NPC row. Fixed at every entry point via `AxisRender.toInt`.
+  Lesson kept: verify through the control the GM will use, not the API
+  under it.
+- **Test note:** End Encounter uses a native `confirm()`; scripted tests
+  must stub `window.confirm` or the click silently does nothing.
+- NPC stat blocks from the Mikko PDF carry no ability scores; the
+  Inspector's "STR —" is the source, not a rendering gap.
+
+## Assets
+
+The infirmary still is 3840×2160 PNG, 9.6 MB. The served asset is a WebP at
+2560 wide (~2 MB); the original stays out of the repo. Images are referenced
+files, never base64.
+
+## State additions
+
+```
+layout:   { dir, children }                         // per-browser, exported
+selection:{ kind, id }                              // not persisted
+maps:     { [sceneHash]: { image, w, h, grid:{size, ox, oy}, fog:[...],
+            tokens:[{ instanceId, x, y, size }], effects:[...] } }
+```
+
+`maps` rides in the GM-state export like `combat` does.

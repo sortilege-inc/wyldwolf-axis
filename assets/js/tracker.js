@@ -1,25 +1,25 @@
-// tracker.js — the adventure tracker. Generic over any adventure object
-// shaped like data.adventures[<id>] (name/description/themes/locations/
-// phases/scenes/cast); "Exorcism of Mikko" is the first content module,
-// not baked into this code — a second adventure just needs a second key
-// under data.adventures and a nav entry pointing at the same render fn.
+// tracker.js — the adventure tracker, in two halves that share one piece of
+// state (which scene is current, State.trackerPage):
+//   renderTracker  overview, progress, GM-state file row, and the
+//                  phase-grouped page picker — the navigation half
+//   renderScene    the current scene's page: text, checks, opponents, GM
+//                  notes, and Run Encounter — the content half
+// render() stacks both for the single-panel (narrow) mode. Both halves are
+// generic over any adventure shaped like data.adventures[<id>]; "Exorcism
+// of Mikko" is the first content module, not baked in.
 //
-// Presented as a page-through book: one scene per page (grouped/jumped-to
-// by phase via a mini-map), not one long scroll — the phase/scene
-// structure itself (data.adventures[<id>].phases/scenes) is untouched,
-// this only changes how it's paged through.
+// Page order is derived from the source's own FLOW phase order and
+// scene_hashes order, never invented (buildPages is the only place that
+// imposes an order at all).
 window.AxisTracker = (function () {
   const { el, markdownish, resolveEntity } = window.AxisRender;
   const State = window.AxisState;
+  const Bus = window.AxisBus;
 
   function findScene(scenes, hash) {
     return scenes.find((s) => s.hash === hash);
   }
 
-  // Flattens phases/scenes (plus any orphan scenes no phase references)
-  // into one ordered page list: [{ phaseName, scene }]. This is the ONLY
-  // place that imposes a page order — it's derived from the source's own
-  // FLOW-authored phase order and scene_hashes order, never invented.
   function buildPages(adventure) {
     const pages = [];
     const referenced = new Set();
@@ -36,11 +36,30 @@ window.AxisTracker = (function () {
     return pages;
   }
 
+  function pageIndexFor(adventureId, pages) {
+    let idx = State.trackerPage(adventureId);
+    if (idx < 0 || idx >= pages.length) idx = 0;
+    return idx;
+  }
+
+  function goToPage(adventureId, pages, idx) {
+    if (idx < 0 || idx >= pages.length) return;
+    State.setTrackerPage(adventureId, idx);
+    Bus.emit('scene:changed', { adventureId, sceneHash: pages[idx].scene.hash, pageIndex: idx });
+  }
+
+  function selectable(label, sel) {
+    const b = el('button', { class: 'sel-link', type: 'button' }, [label]);
+    b.addEventListener('click', () => window.AxisPanels.select(sel));
+    return b;
+  }
+
+  // ── scene page body ────────────────────────────────────────────────
   function sceneBody(adventureId, scene, adversaries, npcs) {
     const st = State.sceneState(adventureId, scene.hash);
     const bodyWrap = el('div', { class: 'scene-body' });
 
-    if (scene.location) bodyWrap.appendChild(el('div', { class: 'view-sub' }, ['Location: ' + scene.location]));
+    if (scene.location) bodyWrap.appendChild(el('div', { class: 'view-sub' }, ['Location: ', selectable(scene.location, { kind: 'location', name: scene.location })]));
     if (scene.description) bodyWrap.appendChild(el('div', { html: markdownish(scene.description) }));
     (scene.read_aloud || []).forEach((t) => bodyWrap.appendChild(el('div', { class: 'read-aloud' }, [t])));
     (scene.checks || []).forEach((c) =>
@@ -50,19 +69,20 @@ window.AxisTracker = (function () {
       bodyWrap.appendChild(el('div', { class: 'clue-line' }, [el('b', {}, [c.name + ': ']), c.description || '']))
     );
     if (scene.conflict) {
-      const opp = (scene.conflict.opponents || [])
-        .map((h) => {
-          const found = resolveEntity(h, adversaries, npcs);
-          return found ? found.name : h;
-        })
-        .join(', ');
+      const opponents = scene.conflict.opponents || [];
+      const oppNodes = [];
+      opponents.forEach((h, i) => {
+        const found = resolveEntity(h, adversaries, npcs);
+        if (i) oppNodes.push(', ');
+        oppNodes.push(selectable(found ? found.name : h, { kind: 'ref', ref: h }));
+      });
       bodyWrap.appendChild(
-        el('div', { class: 'check-line' }, [el('b', {}, ['Conflict: ']), `${scene.conflict.stakes || ''}${opp ? ' — opponents: ' + opp : ''}`])
+        el('div', { class: 'check-line' }, [el('b', {}, ['Conflict: ']), scene.conflict.stakes || '', ...(oppNodes.length ? [' — opponents: ', ...oppNodes] : [])])
       );
-      // Per-instance GM overrides: this adversary AS IT APPEARS IN THIS
-      // SCENE, not a global edit to the adversary catalog entry — a table
-      // that fights the same monster type twice can track them separately.
-      (scene.conflict.opponents || []).forEach((h) => {
+      // Pre-encounter scene defaults: this adversary AS IT APPEARS IN THIS
+      // SCENE. Once Run Encounter has seeded instances, those are the live
+      // record (see state.js `combat`).
+      opponents.forEach((h) => {
         const found = resolveEntity(h, adversaries, npcs);
         const label = found ? found.name : h;
         const baseHp = found && found.properties ? found.properties['Hit Points'] : null;
@@ -112,9 +132,8 @@ window.AxisTracker = (function () {
     URL.revokeObjectURL(url);
   }
 
-  // GM-state export/import: adventure tracker progress (scene checkboxes/
-  // notes) plus per-scene adversary-instance overrides — a SEPARATE file
-  // from the party export (see party.js / state.js), by design.
+  // GM-state export/import: progress, per-scene overrides, live combat,
+  // layout — a SEPARATE file from the party export, by design.
   function gmStateFileRow() {
     const exportBtn = el('button', { class: 'btn btn-ghost' }, ['Export GM state']);
     exportBtn.addEventListener('click', () => downloadJson(State.exportGmStateFile(), 'wyldwolf-axis-gm-state.json'));
@@ -143,36 +162,24 @@ window.AxisTracker = (function () {
     return el('div', { class: 'chiprow' }, [exportBtn, importBtn, fileInput]);
   }
 
-  function render(container, adventureId, adventure, adversaries, npcs) {
+  // ── tracker half ───────────────────────────────────────────────────
+  function renderTracker(container, adventureId, adventure, adversaries, npcs, ctx) {
     container.innerHTML = '';
-    const totalScenes = adventure.scenes.length;
-    const prog = State.adventureProgress(adventureId, totalScenes);
     const pages = buildPages(adventure);
+    const totalScenes = adventure.scenes.length;
 
-    let pageIndex = State.trackerPage(adventureId);
-    if (pageIndex < 0 || pageIndex >= pages.length) pageIndex = 0;
-    let playModeOn = false;
-
-    container.appendChild(
-      el('div', { class: 'view-header' }, [
-        el('h1', {}, [adventure.name || 'Adventure']),
-        el('div', { class: 'view-sub' }, [`${prog.done} / ${prog.total} scenes marked done`]),
-      ])
-    );
-    container.appendChild(
-      el('div', { class: 'progress-bar' }, [el('div', { style: `width:${totalScenes ? (100 * prog.done) / totalScenes : 0}%` })])
-    );
+    const progLabel = el('div', { class: 'view-sub' });
+    const progBar = el('div', {});
+    container.appendChild(el('div', { class: 'view-header' }, [el('h1', {}, [adventure.name || 'Adventure']), progLabel]));
+    container.appendChild(el('div', { class: 'progress-bar' }, [progBar]));
     container.appendChild(gmStateFileRow());
     if (adventure.description) container.appendChild(el('div', { html: markdownish(adventure.description) }));
-
     if (adventure.themes && adventure.themes.length) {
       container.appendChild(el('h2', {}, ['Themes']));
       container.appendChild(el('ul', { class: 'themes-list' }, adventure.themes.map((t) => el('li', {}, [t]))));
     }
 
-    // ── page-picker mini-map: grouped by phase, jump directly to any
-    // scene rather than only stepping linearly — a GM at the table needs
-    // to jump around, not just page forward. ──────────────────────────
+    // phase-grouped picker: jump straight to any scene
     const pickerWrap = el('div', { class: 'page-picker' });
     let phaseCursor = null;
     let phaseRow = null;
@@ -183,81 +190,78 @@ window.AxisTracker = (function () {
         phaseRow = el('div', { class: 'page-picker-row' });
         pickerWrap.appendChild(phaseRow);
       }
-      const done = State.sceneState(adventureId, p.scene.hash).done;
-      const btn = el(
-        'button',
-        { class: 'page-dot' + (idx === pageIndex ? ' active' : '') + (done ? ' done' : ''), title: p.scene.name },
-        [String(idx + 1)]
-      );
-      btn.addEventListener('click', () => goToPage(idx));
+      const btn = el('button', { class: 'page-dot', title: p.scene.name }, [String(idx + 1)]);
+      btn.addEventListener('click', () => goToPage(adventureId, pages, idx));
       phaseRow.appendChild(btn);
     });
 
-    // ── prev/next + current page name ─────────────────────────────────
     const prevBtn = el('button', { class: 'btn' }, ['◀ Prev']);
     const nextBtn = el('button', { class: 'btn' }, ['Next ▶']);
     const pageLabel = el('div', { class: 'page-label' });
-    prevBtn.addEventListener('click', () => goToPage(pageIndex - 1));
-    nextBtn.addEventListener('click', () => goToPage(pageIndex + 1));
-    const pagerRow = el('div', { class: 'pager-row' }, [prevBtn, pageLabel, nextBtn]);
-
-    const pageContent = el('div', {});
+    prevBtn.addEventListener('click', () => goToPage(adventureId, pages, pageIndexFor(adventureId, pages) - 1));
+    nextBtn.addEventListener('click', () => goToPage(adventureId, pages, pageIndexFor(adventureId, pages) + 1));
 
     container.appendChild(pickerWrap);
-    container.appendChild(pagerRow);
-    container.appendChild(pageContent);
+    container.appendChild(el('div', { class: 'pager-row' }, [prevBtn, pageLabel, nextBtn]));
 
-    function goToPage(idx) {
-      if (idx < 0 || idx >= pages.length) return;
-      pageIndex = idx;
-      playModeOn = false;
-      State.setTrackerPage(adventureId, pageIndex);
-      renderPage();
-    }
-
-    function renderPage() {
-      pageContent.innerHTML = '';
-      pickerWrap.querySelectorAll('.page-dot').forEach((b, i) => {
-        // page-dot buttons are appended in page order across all phase
-        // rows, so a flat NodeList index lines up with `pages` index.
-      });
-      // refresh active/done styling on the picker without a full rebuild
+    function refresh() {
+      const idx = pageIndexFor(adventureId, pages);
+      const prog = State.adventureProgress(adventureId, totalScenes);
+      progLabel.textContent = `${prog.done} / ${prog.total} scenes marked done`;
+      progBar.style.width = `${totalScenes ? (100 * prog.done) / totalScenes : 0}%`;
       Array.from(pickerWrap.querySelectorAll('.page-dot')).forEach((b, i) => {
-        const done = State.sceneState(adventureId, pages[i].scene.hash).done;
-        b.classList.toggle('active', i === pageIndex);
-        b.classList.toggle('done', done);
+        b.classList.toggle('active', i === idx);
+        b.classList.toggle('done', State.sceneState(adventureId, pages[i].scene.hash).done);
       });
-
       if (!pages.length) {
-        pageContent.appendChild(el('div', { class: 'view-sub' }, ['This adventure has no scenes yet.']));
         pageLabel.textContent = '';
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
+        prevBtn.disabled = nextBtn.disabled = true;
         return;
       }
+      pageLabel.textContent = `${pages[idx].phaseName} — Scene ${idx + 1} of ${pages.length}: ${pages[idx].scene.name}`;
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === pages.length - 1;
+    }
 
-      const page = pages[pageIndex];
+    ctx.on('scene:changed', refresh);
+    ctx.on('state:changed', refresh); // done-marks, progress
+    refresh();
+  }
+
+  // ── scene half ─────────────────────────────────────────────────────
+  // Which scenes are in play mode. Survives re-renders (a remote HP change
+  // must not kick the GM out of the encounter view); reset when the GM
+  // navigates to a different scene.
+  const playModeOn = {};
+
+  function renderScene(container, adventureId, adventure, adversaries, npcs, ctx) {
+    const pages = buildPages(adventure);
+
+    function draw() {
+      container.innerHTML = '';
+      if (!pages.length) {
+        container.appendChild(el('div', { class: 'view-sub' }, ['This adventure has no scenes yet.']));
+        return;
+      }
+      const idx = pageIndexFor(adventureId, pages);
+      const page = pages[idx];
       const scene = page.scene;
-      pageLabel.textContent = `${page.phaseName} — Scene ${pageIndex + 1} of ${pages.length}: ${scene.name}`;
-      prevBtn.disabled = pageIndex === 0;
-      nextBtn.disabled = pageIndex === pages.length - 1;
-
       const st = State.sceneState(adventureId, scene.hash);
+
       const checkbox = el('input', { type: 'checkbox' });
       checkbox.checked = st.done;
       checkbox.addEventListener('change', () => {
         State.setSceneDone(adventureId, scene.hash, checkbox.checked);
         card.classList.toggle('done', checkbox.checked);
-        const dot = pickerWrap.querySelectorAll('.page-dot')[pageIndex];
-        if (dot) dot.classList.toggle('done', checkbox.checked);
       });
 
       const hasOpponents = !!(scene.conflict && scene.conflict.opponents && scene.conflict.opponents.length);
-      const runBtn = el('button', { class: 'btn' + (playModeOn ? '' : ' btn-ghost') }, [playModeOn ? 'Back to Scene' : 'Run Encounter ▶']);
+      const on = !!playModeOn[scene.hash];
+      const runBtn = el('button', { class: 'btn' + (on ? '' : ' btn-ghost') }, [on ? 'Back to Scene' : 'Run Encounter ▶']);
       runBtn.hidden = !hasOpponents;
       runBtn.addEventListener('click', () => {
-        playModeOn = !playModeOn;
-        renderPage();
+        playModeOn[scene.hash] = !on;
+        draw();
       });
 
       const header = el('div', { class: 'scene-header page-scene-header' }, [
@@ -266,22 +270,42 @@ window.AxisTracker = (function () {
         scene.type ? el('span', { class: 'view-sub' }, [scene.type]) : null,
         runBtn,
       ]);
+      const card = el('div', { class: 'scene-card page-scene-card' + (st.done ? ' done' : '') }, [
+        el('div', { class: 'view-sub' }, [`${page.phaseName} — Scene ${idx + 1} of ${pages.length}`]),
+        header,
+      ]);
 
-      var card = el('div', { class: 'scene-card page-scene-card' + (st.done ? ' done' : '') }, [header]);
-
-      if (playModeOn && hasOpponents && window.AxisPlayMode) {
+      if (on && hasOpponents && window.AxisPlayMode) {
         const playWrap = el('div', { class: 'play-mode-wrap' });
         card.appendChild(playWrap);
         window.AxisPlayMode.render(playWrap, adventureId, scene, adversaries, npcs);
       } else {
         card.appendChild(sceneBody(adventureId, scene, adversaries, npcs));
       }
-
-      pageContent.appendChild(card);
+      container.appendChild(card);
     }
 
-    renderPage();
+    ctx.on('scene:changed', (p) => {
+      if (p && p.adventureId === adventureId) draw();
+    });
+    // Only *other* windows' changes redraw the scene: local edits already
+    // updated the DOM they came from, and a redraw would eat input focus.
+    ctx.on('state:changed', (p, meta) => {
+      if (meta && meta.remote) draw();
+    });
+    draw();
   }
 
-  return { render };
+  // Single-panel mode: both halves stacked.
+  function render(container, adventureId, adventure, adversaries, npcs, ctx) {
+    container.innerHTML = '';
+    const top = el('div', {});
+    const bottom = el('div', { class: 'scene-stack' });
+    container.appendChild(top);
+    container.appendChild(bottom);
+    renderTracker(top, adventureId, adventure, adversaries, npcs, ctx);
+    renderScene(bottom, adventureId, adventure, adversaries, npcs, ctx);
+  }
+
+  return { render, renderTracker, renderScene, buildPages };
 })();

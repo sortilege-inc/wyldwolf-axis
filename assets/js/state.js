@@ -51,6 +51,10 @@ window.AxisState = (function () {
       //                  conditions: [{id, name, duration}], notes }]
       // }
       combat: {},
+      // Tile layout of the main page (see layout.js). null → the default
+      // preset. Per-browser like everything else here, and carried in the
+      // GM-state export so a table setup travels with the campaign.
+      layout: null,
     };
   }
 
@@ -67,12 +71,40 @@ window.AxisState = (function () {
     }
   }
 
+  // Re-read localStorage IN PLACE. `state` is handed out by reference
+  // (State.state) all over the app, so it must stay the same object —
+  // another window's save has to land in the object everyone already holds.
+  function reload() {
+    const fresh = load();
+    Object.keys(state).forEach((k) => delete state[k]);
+    Object.assign(state, fresh);
+  }
+
   function save() {
     try {
       localStorage.setItem(KEY, JSON.stringify(state));
     } catch (e) {
       // private window / storage blocked — state just won't persist this session
     }
+    if (window.AxisBus) window.AxisBus.emit('state:changed', { at: Date.now() });
+  }
+
+  // Another window saved: pull its state in before anyone else's handler
+  // runs. This registers first because state.js loads first.
+  if (window.AxisBus) {
+    window.AxisBus.on('state:changed', (payload, meta) => {
+      if (meta && meta.remote) reload();
+    });
+  }
+
+  // ── Layout ─────────────────────────────────────────────────────────
+  function layout() {
+    return state.layout;
+  }
+
+  function setLayout(tree) {
+    state.layout = tree;
+    save();
   }
 
   function sceneState(adventureId, sceneHash) {
@@ -198,6 +230,7 @@ window.AxisState = (function () {
       progress: state.progress,
       encounterOverrides: state.encounterOverrides,
       combat: state.combat,
+      layout: state.layout,
     };
   }
 
@@ -207,6 +240,7 @@ window.AxisState = (function () {
     if (gmData.progress) state.progress = Object.assign({}, state.progress, gmData.progress);
     if (gmData.encounterOverrides) state.encounterOverrides = Object.assign({}, state.encounterOverrides, gmData.encounterOverrides);
     if (gmData.combat) state.combat = Object.assign({}, state.combat, gmData.combat);
+    if (gmData.layout) state.layout = gmData.layout;
     save();
   }
 
@@ -329,7 +363,8 @@ window.AxisState = (function () {
   }
 
   return {
-    state, save, sceneState, setSceneDone, setSceneNotes, adventureProgress,
+    state, save, reload, layout, setLayout,
+    sceneState, setSceneDone, setSceneNotes, adventureProgress,
     addPartyMember, resyncPartyMember, removePartyMember, setPartyHp, setPartyNotes, setPartyConditions,
     loadPartyFile, exportPartyFile,
     encounterOverride, setEncounterOverride, exportGmStateFile, loadGmStateFile,

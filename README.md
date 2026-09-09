@@ -1,9 +1,11 @@
 # Wyldwolf Axis — GM Table Tool
 
-A single-page, buildless web tool for one GM running **The Exorcism of Mikko**, a
-D&D-5e-compatible adventure set in **The Axis Saga: War of Silence** (Wyldwolf Games /
-Badwolf Studios). Unlike a convention multi-table tool, this assumes one ongoing
-campaign — progress is just saved in this browser, no table password, no export/import.
+A buildless web tool for one GM running **The Exorcism of Mikko**, a D&D-5e-compatible
+adventure set in **The Axis Saga: War of Silence** (Wyldwolf Games / Badwolf Studios).
+One ongoing campaign, saved in this browser; the party and the GM's state each export to
+their own file so a campaign can move machines or be backed up.
+
+Live: https://sortilege-inc.github.io/wyldwolf-axis/
 
 ## Running it
 
@@ -13,18 +15,35 @@ Static files, no build step to view it (only to regenerate `data/data.js`):
 python3 -m http.server 8934
 ```
 
-then open `http://localhost:8934/index.html`.
+then open `http://localhost:8934/`.
 
-## Tabs
+## The page
 
-| Tab | What it is |
+At 900px and wider the main area is a **tile layout**: rows or columns of panels, nested
+one level, at most three per group, resizable by dragging the gutters. The default is
+three columns — Adventure Tracker · Scene / Encounter · (Inspector over Rules Glossary).
+The sidebar switches presets and opens a tree editor; each tile's header has a picker to
+swap what it shows. Any panel not on screen opens in a drawer from the sidebar. Below
+900px it falls back to one panel at a time.
+
+| Panel | What it is |
 |---|---|
-| **Dashboard** | Adventure progress, quick-nav tiles, themes. |
-| **Adventure Tracker** | Mikko's four phases (Arrival / Investigation / The Ritual / Epilogue) and 11 scenes, each with its read-aloud text, description, skill checks, clues, conflict/opponents, objectives and resolutions — a checkbox and a notes field per scene, saved to this browser. |
-| **NPCs** | The named cast (Captain Ord, Wynota, the Taylors, Bruce/the Howling Silence) — profile box(es) plus a full stat block where the book prints one. |
-| **Adversaries** | Every SRD monster plus the setting's and adventure's own (335 total) as full 5e-style stat blocks, filterable by SRD base / Axis setting / Mikko-original. |
-| **Spells / Items / Subclasses / Artifacts / Rules Glossary** | The rest of the merged corpus — Axis setting content extends the SRD base, Mikko content extends that. |
-| **Lore** | The adventure's own narrative and the Axis setting preview, verbatim, by heading. |
+| **Adventure Tracker** | Progress, GM-state export/import, and the phase-grouped scene picker (Arrival / Investigation / The Ritual / Epilogue, 11 scenes). |
+| **Scene / Encounter** | The current scene: read-aloud text, checks, clues, opponents, objectives, resolutions, a done checkbox and GM notes. **Run Encounter** turns it into the combat panel: initiative, rounds and turns, per-instance HP, conditions with durations, an active-effects sidebar, attack rolls and spell text from stat blocks, and a creature search over all 335 adversaries to add more. |
+| **Inspector** | Whatever was last selected — a combatant, an opponent, a location, a party member, or any catalog entry — with live HP/conditions for combatants. |
+| **Party** | Characters imported from D&D Beyond share links (one-time snapshot, explicit re-sync), editable HP/conditions/notes, party-file export/import. |
+| **NPCs** | The named cast — profile box(es) plus a stat block where the book prints one. |
+| **Adversaries / Spells / Items / Subclasses / Artifacts / Rules Glossary** | The merged corpus, searchable; Axis content extends the SRD, Mikko extends Axis. |
+| **Lore** | The adventure's narrative and the Axis preview, verbatim, by heading. |
+
+Every window of the tool (the main page now; the VTT and player view next) shares one
+localStorage state and one `BroadcastChannel`, so a change in one is live in the others.
+
+## D&D Beyond import
+
+The character API has no CORS headers, so the page can't fetch it directly. `worker/` is
+a small Cloudflare Worker that proxies the fetch with CORS scoped to this app's origin;
+deploy it per `worker/README.md` and put its URL in `assets/js/ddb-import.js`.
 
 ## Where the content comes from
 
@@ -43,11 +62,11 @@ bash build/build.sh
 
 | Script | What it does |
 |---|---|
-| `build/parse_dsl.py` | Generic tokenizer + recursive-descent tree parser for the DSL's `.actor`/`.arc` grammar (tokenizer rules — string/hash-id/comment handling — follow the canonical `ttrpg_validator.py`). Knows nothing about scenes or NPCs; it just turns any well-formed block into a generic `{form, keyword, name, hash, body/items/value}` tree. |
-| `build/extract_supplement.py` | Walks that generic tree to pull the specific shapes out of the Mikko `.actor` (NPC profile boxes + stat blocks + features), `.arc` (locations, FLOW/phases, scenes with checks/clues/objectives/conflict/resolutions, cast), and `.lore` (heading-delimited narrative sections) files — the file kinds the Go synthesist does **not** merge (it only merges `.ttrpg`). |
-| `build/build_data.py` | Runs the Go synthesist (`titterpig-synthesist`) to merge all `.ttrpg` across the three layers into one resolved JSON (1,475 flattened DEFs), buckets every one of them by its `EXTENDS` parent into rules/spells/items/adversaries/subclasses/artifacts, and combines that with the supplement JSON into `data/data.js` (`window.AXIS`). |
-| `build/verify_data.py` | Content/coverage gate: every resolved DEF must land in exactly one bucket (none dropped, none duplicated), and NPC/scene/location/lore-section counts must match the supplement exactly. |
-| `build/build.sh` | Runs synthesist merge → supplement extraction → build → gate → `node --check` on every JS file, in order. Fails loudly (non-zero exit) if anything above disagrees. |
+| `build/parse_dsl.py` | Generic tokenizer + recursive-descent tree parser for the DSL's `.actor`/`.arc` grammar (tokenizer rules follow the canonical `ttrpg_validator.py`). Knows nothing about scenes or NPCs. |
+| `build/extract_supplement.py` | Walks that tree to pull NPC profiles/stat blocks/features (`.actor`), locations/FLOW/phases/scenes/cast (`.arc`), and heading-delimited narrative (`.lore`) — the file kinds the Go synthesist does **not** merge. |
+| `build/build_data.py` | Runs `titterpig-synthesist` to merge every `.ttrpg` across the three layers into one resolved JSON (1,475 flattened DEFs), buckets each by its `EXTENDS` parent, and combines that with the supplement into `data/data.js` (`window.AXIS`). |
+| `build/verify_data.py` | Gate: every resolved DEF lands in exactly one bucket, and NPC/scene/location/lore counts match the supplement exactly. |
+| `build/build.sh` | merge → extract → build → gate → `node --check`, failing loudly on any disagreement. |
 
 Gate status, from `bash build/build.sh` on 2026-09-08:
 
@@ -56,60 +75,56 @@ resolved.json: 1475 def entities, 1 non-def (['actor'])
 data.js buckets: rules=331, spells=340, items=453, adversaries=335, subclasses=14, artifacts=2, total=1475
 supplement: npcs=15 scenes=11 locations=11 lore_sections=28
 verify_data.py: 0 discrepancies
-node --check: 9 files parse
-build.sh: all gates passed.
 ```
 
-## Layout
+## Files
 
 ```
-index.html              the whole page
-assets/css/axis.css      one stylesheet
+index.html                the page
+assets/css/axis.css       one stylesheet
+assets/maps/              served map images (WebP); originals stay out of the repo
 assets/js/
-  state.js               localStorage state (scene ticks + notes), one key
-  render.js               DOM helpers + generic stat-block renderer
-  catalog.js              generic list/search/detail for rules/spells/items/adversaries/subclasses/artifacts
-  npcs.js                 named-cast view (groups profile+statblock rows back into one card per person)
-  tracker.js              the adventure tracker — generic over data.adventures[<id>]
-  lore.js                 narrative viewer
-  dashboard.js            landing page
-  app.js                  tabs/router/boot
-data/data.js             GENERATED — window.AXIS
-build/                   the generator and its gates
+  bus.js                  in-window + cross-window events (BroadcastChannel)
+  state.js                one localStorage key: progress, party, overrides, combat, layout
+  render.js               DOM helpers, stat-block renderer, entity resolution
+  panels.js               panel registry, selection model, Inspector
+  layout.js               tile tree: validation, presets, rendering, gutters, editor
+  app.js                  shell: tiles vs single-panel mode, sidebar
+  tracker.js              Adventure Tracker and Scene panels
+  playmode.js             Run Encounter
+  party.js  ddb-import.js Party panel and the D&D Beyond mapper
+  catalog.js  npcs.js  lore.js  dashboard.js
+data/data.js              GENERATED — window.AXIS
+build/                    the generator and its gates
+worker/                   Cloudflare Worker proxy for D&D Beyond (deploy separately)
+docs/                     plans and decision logs
 ```
 
-No framework, no npm. Python 3 + the Go synthesist for the generator; Node is used only
-for the advisory syntax check.
+No framework, no npm for the page. Python 3 + the Go synthesist for the generator; Node
+only for the syntax check.
 
 ## A second adventure module
 
-The app shell (nav, layout, stat-block renderer, rules glossary) is generic — none of
-`render.js`, `catalog.js`, or `app.js`'s router mention "Mikko". A second adventure adds:
-- a second manifest/merge (or a shared one, if it extends the same base+setting),
-- a second `data.adventures.<id>` key in `build_data.py`'s output,
-- one more nav row in `app.js` pointing `tracker.render` at that key.
-
-`npcs.js` and `tracker.js` are the only pieces that know Mikko-shaped data at all, and
-only because they're passed a specific adventure's data — the functions themselves take
-the adventure/NPC list as a parameter.
+Nothing in the shell knows the word "Mikko". `panels.js` takes the first key of
+`data.adventures` as the active adventure; a second adventure adds a merge, a second
+`data.adventures.<id>` in `build_data.py`'s output, and a way to pick which is active.
+`npcs.js` and `tracker.js` are handed a specific adventure's data as parameters.
 
 ## Judgment calls (flagged for review)
 
-- **Bucketing rule**: every synthesist DEF is bucketed by its `EXTENDS` parent
-  (`Spell`→spells, `Monster`→adversaries, `Magic Item`/`Adventuring Gear`/`Weapon`/`Armor`→items,
-  `Subclass`→subclasses, everything else→the Rules Glossary catch-all so nothing is
-  silently dropped). A `Magic Item` sourced from a file named `*-artifacts.ttrpg` is
-  bucketed as **artifacts** instead of items — that split is a naming-convention
-  inference, not something the DSL tags explicitly.
-- **NPC grouping**: Wynota, Adam Taylor and Nikki Taylor each have a "before possession"
-  profile DEF, a Monster-statblock DEF, and (Wynota only) a second "after" profile DEF
-  nested under the statblock's own `PROFILES` block. The NPC view groups these back into
-  one card per person using the source's own `linked_to`/nesting relationship — Captain
-  Ord and Maya/Bruce/the Howling Silence have no such split.
-- **Scene ordering in the tracker**: the source's own `FLOW` block orders phases and,
-  within the Investigation phase, leaves its six scenes unordered (the adventure's design
-  note says the party visits them in any order) — the tracker preserves that, it does not
-  impose an order the source doesn't have.
+- **Bucketing rule**: every synthesist DEF is bucketed by its `EXTENDS` parent; a
+  `Magic Item` from a file named `*-artifacts.ttrpg` goes to **artifacts** — a
+  naming-convention inference, not a DSL tag.
+- **NPC grouping**: Wynota, Adam and Nikki Taylor each have a profile DEF and a stat-block
+  DEF; the NPC view groups them back into one card per person by the source's own
+  `linked_to`/nesting.
+- **Scene ordering**: the source's `FLOW` leaves the six Investigation scenes unordered by
+  design; the tracker preserves that.
+- **Encounter state**: once Run Encounter has seeded instances, they are the live record;
+  the per-scene HP override is only the pre-encounter default. Ending an encounter
+  discards instance HP/conditions/initiative and keeps party HP.
+- **D&D Beyond mapping**: AC/HP/proficiency are best-effort, not parity with D&D Beyond's
+  own calculator — situational modifiers and homebrew aren't modelled.
 
 ## Credit
 

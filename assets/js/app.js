@@ -1,72 +1,116 @@
-// app.js — tabs/nav and boot. Generic: nav entries point at bucket names;
-// adding a second adventure module means adding a data.adventures key and
-// one more nav row, not touching this router.
+// app.js — shell and boot.
+//
+// Two modes, picked by viewport width:
+//   tiles   (≥ 900px)  the main area is a resizable tile layout
+//                      (layout.js); the sidebar lists panels and opens any
+//                      that isn't on screen in a drawer
+//   single  (< 900px)  one panel at a time, sidebar as tabs — the original
+//                      behaviour, kept for phones and narrow panes
+// Both mount panels through the same registry (panels.js), so a panel
+// never knows which mode it's in.
 (function () {
   const { el } = window.AxisRender;
-  const data = window.AXIS;
+  const State = window.AxisState;
+  const Panels = window.AxisPanels;
+  const Layout = window.AxisLayout;
 
-  const NAV = [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'party', label: 'Party', count: () => window.AxisState.state.party.length },
-    { id: 'adventure', label: 'Adventure Tracker' },
-    { id: 'npcs', label: 'NPCs', count: () => data.npcs.length },
-    { id: 'adversaries', label: 'Adversaries', count: () => data.adversaries.length },
-    { id: 'spells', label: 'Spells', count: () => data.spells.length },
-    { id: 'items', label: 'Items', count: () => data.items.length },
-    { id: 'subclasses', label: 'Subclasses', count: () => data.subclasses.length },
-    { id: 'artifacts', label: 'Artifacts', count: () => data.artifacts.length },
-    { id: 'rules', label: 'Rules Glossary', count: () => data.rules.length },
-    { id: 'lore', label: 'Lore', count: () => data.lore.length },
-  ];
-
-  let current = 'dashboard';
+  const TILE_MIN_WIDTH = 900;
   const main = document.getElementById('main-view');
   const navList = document.getElementById('nav-list');
+  const layoutControls = document.getElementById('layout-controls');
+
+  let mode = null; // 'tiles' | 'single'
+  let current = 'dashboard'; // single mode's active panel
+  let singleCtx = null;
+
+  function wantTiles() {
+    return window.innerWidth >= TILE_MIN_WIDTH;
+  }
 
   function buildNav() {
     navList.innerHTML = '';
-    NAV.forEach((n) => {
-      const btn = el('button', { class: 'navbtn' + (n.id === current ? ' active' : ''), onclick: () => go(n.id) }, [
-        n.label,
-        n.count ? el('span', { class: 'count' }, [String(n.count())]) : null,
+    const mounted = mode === 'tiles' ? Layout.mounted() : [current];
+    Panels.list().forEach((p) => {
+      const btn = el('button', { class: 'navbtn' + (mounted.indexOf(p.id) !== -1 ? ' active' : ''), onclick: () => open(p.id) }, [
+        p.label,
+        p.count ? el('span', { class: 'count' }, [String(p.count())]) : null,
       ]);
       navList.appendChild(el('li', {}, [btn]));
     });
   }
 
-  function go(id) {
+  function buildLayoutControls() {
+    layoutControls.innerHTML = '';
+    if (mode !== 'tiles') return;
+    const preset = el('select', { class: 'tile-picker', title: 'Layout preset' });
+    preset.appendChild(el('option', { value: '' }, ['Layout preset…']));
+    Object.keys(Layout.PRESETS).forEach((k) => preset.appendChild(el('option', { value: k }, [Layout.PRESETS[k].name])));
+    preset.addEventListener('change', () => {
+      if (!preset.value) return;
+      Layout.applyPreset(preset.value);
+      preset.value = '';
+      buildNav();
+    });
+    const edit = el('button', { class: 'btn btn-ghost' }, ['Edit layout']);
+    edit.addEventListener('click', () => Layout.editor());
+    layoutControls.appendChild(preset);
+    layoutControls.appendChild(edit);
+  }
+
+  function open(id) {
+    if (mode === 'tiles') {
+      Layout.open(id);
+      return;
+    }
     current = id;
-    buildNav();
-    renderView();
+    renderSingle();
     window.scrollTo(0, 0);
   }
 
-  function renderView() {
-    switch (current) {
-      case 'dashboard':
-        window.AxisDashboard.render(main, data, go);
-        break;
-      case 'party':
-        window.AxisParty.render(main);
-        break;
-      case 'adventure':
-        window.AxisTracker.render(main, 'mikko', data.adventures.mikko, data.adversaries, data.npcs);
-        break;
-      case 'npcs':
-        window.AxisNpcs.render(main, data.npcs);
-        break;
-      case 'lore':
-        window.AxisLore.render(main, data.lore);
-        break;
-      default:
-        window.AxisCatalog.render(main, current, data[current]);
+  function renderSingle() {
+    if (singleCtx) singleCtx.teardown();
+    singleCtx = Panels.makeCtx(open);
+    main.classList.remove('tiles-mode');
+    main.innerHTML = '';
+    if (current === 'tracker' || current === 'scene') {
+      // one stacked view in single mode, not two tabs
+      const d = window.AXIS;
+      window.AxisTracker.render(main, Panels.adventureId, d.adventures[Panels.adventureId], d.adversaries, d.npcs, singleCtx);
+    } else {
+      Panels.mount(main, current, singleCtx);
     }
+    buildNav();
   }
 
-  // Exposed so views that mutate counted state outside the router (party
-  // add/remove) can refresh the sidebar's counts without a full nav change.
-  window.AxisApp = { refreshNav: buildNav };
+  function applyMode() {
+    const next = wantTiles() ? 'tiles' : 'single';
+    if (next === mode) return;
+    mode = next;
+    if (singleCtx) {
+      singleCtx.teardown();
+      singleCtx = null;
+    }
+    Layout.teardown();
+    if (mode === 'tiles') {
+      Layout.render(main);
+      buildNav();
+    } else {
+      renderSingle();
+    }
+    buildLayoutControls();
+  }
 
-  buildNav();
-  renderView();
+  window.addEventListener('resize', applyMode);
+  // Devtools viewport emulation changes innerWidth without a resize event;
+  // the media-query change fires either way.
+  const mq = window.matchMedia(`(min-width: ${TILE_MIN_WIDTH}px)`);
+  if (mq.addEventListener) mq.addEventListener('change', applyMode);
+
+  // Layout changes (tile picker, editor, preset) re-render through
+  // Layout.render; the sidebar's active marks follow.
+  window.AxisBus.on('state:changed', () => buildNav());
+
+  window.AxisApp = { open, refreshNav: buildNav, mode: () => mode };
+
+  applyMode();
 })();

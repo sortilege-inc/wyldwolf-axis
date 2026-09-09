@@ -129,6 +129,106 @@ main.view {
   max-width: 1200px;
 }
 
+/* ── Tile layout (layout.js) ───────────────────────────── */
+
+main.view.tiles-mode {
+  max-width: none;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}
+.tile-group {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+}
+.tile-group.dir-row { grid-auto-flow: column; }
+.tile-group.dir-col { grid-auto-flow: row; }
+.tile {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--ink);
+  container-type: inline-size;
+}
+.tile-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.7rem;
+  background: var(--ink-2);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-display);
+  color: var(--gold);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex: none;
+}
+.tile-picker {
+  margin-left: auto;
+  background: var(--ink);
+  color: var(--frost-dim);
+  border: 1px solid var(--line);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 3px;
+  max-width: 11rem;
+}
+.tile-picker:hover { color: var(--paper); border-color: var(--teal-dim); }
+.tile-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 1rem 1.2rem 2rem;
+}
+.tile .view-header h1 { font-size: 1.45rem; }
+.tile-gutter { background: var(--line); }
+.dir-row > .tile-gutter { cursor: col-resize; }
+.dir-col > .tile-gutter { cursor: row-resize; }
+.tile-gutter:hover, .tile-gutter.dragging { background: var(--teal-dim); }
+@keyframes tile-flash { from { box-shadow: inset 0 0 0 2px var(--teal); } to { box-shadow: inset 0 0 0 2px transparent; } }
+.tile.flash { animation: tile-flash 1.2s ease-out; }
+
+.layout-controls { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.9rem; }
+.layout-controls:empty { display: none; }
+.layout-controls .tile-picker { margin-left: 0; max-width: none; width: 100%; }
+.layout-editor .le-row { display: flex; gap: 0.4rem; align-items: center; margin: 0.3rem 0; flex-wrap: wrap; }
+.layout-editor .le-group { border: 1px solid var(--line); padding: 0.5rem 0.7rem; margin: 0.4rem 0; border-radius: 4px; }
+.layout-editor .le-group .le-group { margin-left: 1rem; border-color: var(--gold-dim); }
+.layout-errors { color: var(--danger-bright); min-height: 1.2em; }
+.drawer-panel { min-height: 40vh; }
+
+.inspector-empty { color: var(--frost-dim); font-style: italic; }
+.inspector-live { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.6rem; }
+.sel-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--teal);
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+.sel-link:hover { color: var(--paper); }
+.combat-name-btn { font-weight: 600; }
+.scene-stack { margin-top: 1.2rem; }
+
+/* Panels inside a narrow tile: the same collapses the viewport queries
+   below do, keyed on the tile's own width. */
+@container (max-width: 720px) {
+  .combat-body-layout { grid-template-columns: 1fr; }
+  .effects-sidebar { position: static; }
+  .combat-row { grid-template-columns: 1.2rem 1fr; }
+  .combat-init, .combat-hp { grid-column: 1 / -1; }
+  .card-grid { grid-template-columns: 1fr; }
+}
+
 .view-header {
   display: flex;
   align-items: baseline;

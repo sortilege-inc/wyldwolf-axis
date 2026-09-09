@@ -73,7 +73,7 @@ window.AxisCatalog = (function () {
       filtered.forEach((row) => {
         const card = el(
           'div',
-          { class: 'card', onclick: () => openDetail(row, cfg) },
+          { class: 'card', onclick: () => openDetail(row, cfg, bucketName) },
           [
             el('h3', {}, [row.name, row.mikko ? el('span', { class: 'badge mikko' }, ['Mikko']) : row.thirdParty ? el('span', { class: 'badge' }, ['Axis']) : null]),
             row.extends ? el('div', { class: 'tag' }, [row.extends]) : null,
@@ -92,7 +92,13 @@ window.AxisCatalog = (function () {
     draw();
   }
 
-  function openDetail(row, cfg) {
+  // With an Inspector tile on screen, a card click selects into it; without
+  // one, the detail opens in a drawer as before.
+  function openDetail(row, cfg, bucketName) {
+    if (bucketName && window.AxisPanels && window.AxisPanels.hasInspector()) {
+      window.AxisPanels.select({ kind: 'entity', bucket: bucketName, hash: row.hash, name: row.name });
+      return;
+    }
     let body;
     if (cfg.isStatblock) {
       body = statBlock(row.name, row.properties, row.features);

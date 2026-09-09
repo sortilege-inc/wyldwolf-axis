@@ -16,7 +16,7 @@ window.AxisDashboard = (function () {
     container.appendChild(el('div', { class: 'view-sub' }, [`Adventure progress: ${prog.done} / ${prog.total} scenes`]));
 
     const tiles = [
-      ['adventure', 'Adventure Tracker', prog.total],
+      ['tracker', 'Adventure Tracker', prog.total],
       ['npcs', 'NPCs', meta.counts.npcs],
       ['adversaries', 'Adversaries', meta.counts.adversaries],
       ['spells', 'Spells', meta.counts.spells],

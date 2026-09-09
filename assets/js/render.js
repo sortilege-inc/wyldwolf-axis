@@ -175,19 +175,32 @@ window.AxisRender = (function () {
     return null;
   }
 
-  function drawer(contentNode) {
+  // Corpus numbers arrive as strings ("77", "9"); anything that does
+  // arithmetic on them goes through here. null when not a number.
+  function toInt(v) {
+    const n = parseInt(v, 10);
+    return isNaN(n) ? null : n;
+  }
+
+  // onClose (optional) runs once when the drawer goes away by either path —
+  // panels mounted inside a drawer use it to drop their bus subscriptions.
+  function drawer(contentNode, onClose) {
+    function close() {
+      overlay.remove();
+      if (onClose) onClose();
+    }
     const overlay = el('div', { class: 'drawer-overlay' }, [
       el('div', { class: 'drawer' }, [
-        el('button', { class: 'drawer-close', onclick: () => overlay.remove() }, ['✕']),
+        el('button', { class: 'drawer-close', onclick: close }, ['✕']),
         contentNode,
       ]),
     ]);
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.remove();
+      if (e.target === overlay) close();
     });
     document.body.appendChild(overlay);
     return overlay;
   }
 
-  return { el, esc, markdownish, propList, statBlock, drawer, abilityMod, fmtMod, resolveEntity };
+  return { el, esc, markdownish, propList, statBlock, drawer, abilityMod, fmtMod, resolveEntity, toInt };
 })();
