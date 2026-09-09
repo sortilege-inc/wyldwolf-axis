@@ -293,6 +293,8 @@ window.AxisTracker = (function () {
     ctx.on('state:changed', (p, meta) => {
       if (meta && meta.remote) draw();
     });
+    // …and ops that arrived over the session socket (a player's edit).
+    ctx.on('state:remote', draw);
     draw();
   }
 

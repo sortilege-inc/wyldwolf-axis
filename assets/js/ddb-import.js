@@ -21,8 +21,9 @@
 // descriptive sheet. Numbers are best-effort: D&D Beyond's own calculator
 // handles situational modifiers and homebrew this does not.
 window.AxisDdbImport = (function () {
-  // ── Deployed proxy URL — fill this in after `wrangler deploy` from worker/.
-  const DDB_PROXY_URL = 'REPLACE_ME'; // e.g. 'https://wyldwolf-axis.<your-subdomain>.workers.dev'
+  // The Worker (config.js): localhost:8787 under `wrangler dev`, the
+  // deployed URL otherwise.
+  const DDB_PROXY_URL = window.AxisConfig && window.AxisConfig.configured ? window.AxisConfig.WORKER_URL : 'REPLACE_ME';
 
   function parseCharacterId(input) {
     if (!input) return null;
@@ -34,7 +35,7 @@ window.AxisDdbImport = (function () {
 
   async function fetchCharacterJson(characterId) {
     if (!DDB_PROXY_URL || DDB_PROXY_URL === 'REPLACE_ME') {
-      throw new Error('D&D Beyond proxy URL not configured. Deploy worker/ (see worker/README.md) and set DDB_PROXY_URL in assets/js/ddb-import.js.');
+      throw new Error('Worker URL not configured. Deploy worker/ (see worker/README.md) and set DEPLOYED in assets/js/config.js.');
     }
     const url = `${DDB_PROXY_URL.replace(/\/$/, '')}/?id=${encodeURIComponent(characterId)}`;
     const res = await fetch(url);

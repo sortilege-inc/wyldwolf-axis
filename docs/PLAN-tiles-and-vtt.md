@@ -80,6 +80,22 @@ noted on the sheet as best-effort like AC.
   class-derived spell slots as `available: 0`; the mapper now falls back to
   the standard table by caster level.
 
+- **B + C landed** (2026-09-09), verified against `wrangler dev` with the
+  GM page on localhost and the player on 127.0.0.1 (a separate origin, so
+  separate storage — a same-origin tab would have shared the GM's session
+  key). Start session → room code and join link; player auto-joined from
+  the link, claimed Eeyore, got the sheet with GM notes absent from their
+  copy; reload restored both roles. Player slot spend and Produce Flame
+  roll reached the GM; a player `setMapState` was refused by the server
+  ("not allowed"). GM damage redrew the player's sheet live. Player
+  dragged their Ape on their table → GM page and GM table both show (8,5);
+  dragging Adam panned instead. Found on the way: ops applied from the
+  socket fire `state:changed` with `remote: false`, so panels that only
+  redrew on outside changes missed them — the session now emits
+  `state:remote` and those panels listen for it. Also an index bug in the
+  player rule for summoning (args[3] for a 3-arg op), caught by the Node
+  unit test before it reached a browser.
+
 ## Panel split
 
 Today's Adventure Tracker is both navigation and the scene page. It becomes:

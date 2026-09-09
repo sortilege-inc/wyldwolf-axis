@@ -279,6 +279,30 @@ body.player .token { cursor: default; }
 .vtt-menu .row:empty { display: none; }
 .window-controls { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.9rem; }
 
+/* ── Session controls + player page (play.html) ─────────── */
+
+.session-controls { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; font-size: 0.85rem; }
+.session-controls:empty { display: none; }
+.session-code { display: flex; align-items: center; gap: 0.4rem; }
+.session-code b { font-family: var(--font-mono); font-size: 1.1rem; color: var(--gold); letter-spacing: 0.08em; }
+.session-url { word-break: break-all; font-size: 0.7rem; }
+.chip.on { color: var(--teal); border-color: var(--teal-dim); }
+
+body.play { min-height: 100vh; }
+.play-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.8rem 1.2rem; border-bottom: 1px solid var(--line); background: var(--ink-2); }
+.play-head .brand { border: none; margin: 0; padding: 0; font-size: 1.2rem; }
+.play-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+.play-main { padding: 1.2rem; max-width: 860px; margin: 0 auto; }
+.play-card { background: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; padding: 1.2rem 1.4rem; }
+.play-card.wide { padding: 0.8rem 1rem; }
+.play-bar { margin-bottom: 0.6rem; }
+.code-input { font-family: var(--font-mono); letter-spacing: 0.15em; text-transform: uppercase; }
+.session-error { color: var(--danger-bright); margin-bottom: 0.5rem; }
+@media (max-width: 600px) {
+  .play-main { padding: 0.6rem; }
+  .abilities-row { flex-wrap: wrap; }
+}
+
 /* ── Character sheet (sheet.js) ─────────────────────────── */
 
 .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }

@@ -62,11 +62,28 @@ panel updates as you go. Clicking a token selects it in the Inspector, and vice 
 Map state (image, grid, tokens, effects, fog) lives per scene in GM state and travels
 with the GM-state export.
 
-## D&D Beyond import
+## Sessions — players on their own devices
 
-The character API has no CORS headers, so the page can't fetch it directly. `worker/` is
-a small Cloudflare Worker that proxies the fetch with CORS scoped to this app's origin;
-deploy it per `worker/README.md` and put its URL in `assets/js/ddb-import.js`.
+**Start session** in the sidebar creates a room and shows a code and a join link
+(`play.html?s=CODE`). A player opens it on their phone, claims one of the party's
+characters, and gets their sheet: they can spend slots and resources, take damage and
+heal, apply conditions, roll checks, saves, attacks and spells, rest, summon a companion,
+and move their own tokens on the table (`vtt.html?view=player`, opened from the play
+page). Everything they do shows up live on the GM's page and table; everything the GM
+does to their character shows up live on theirs. They cannot change anything D&D Beyond
+decides — race, class, feats, scores, features — and they never receive GM notes, hidden
+tokens, or unrevealed fog.
+
+How it works: every shared change is a named op (`assets/js/ops.js`) applied identically
+in the browser and in a `SessionRoom` Durable Object that holds the session's document,
+validates each op by role, and fans it out over WebSockets. One window per browser holds
+the socket; the other windows (the table) ride the same in-browser bus as before. No
+session → nothing leaves the browser, exactly as before. No accounts: the join link plus
+a claim is the whole identity, like a room code, and the GM can release a claim.
+
+The Worker in `worker/` also proxies the D&D Beyond character API (no CORS headers on
+their side). One deploy per `worker/README.md`, then set its URL in `assets/js/config.js`;
+served from localhost the app talks to `wrangler dev` automatically.
 
 ## Where the content comes from
 
@@ -103,12 +120,17 @@ verify_data.py: 0 discrepancies
 ## Files
 
 ```
-index.html                the page
+index.html                the GM's page
+vtt.html                  the table (GM view; ?view=player for players and the TV)
+play.html                 the player's page: join, claim, sheet
 assets/css/axis.css       one stylesheet
 assets/maps/              served map images (WebP); originals stay out of the repo
 assets/js/
+  config.js               where the Worker is
   bus.js                  in-window + cross-window events (BroadcastChannel)
-  state.js                one localStorage key: progress, party, overrides, combat, layout
+  ops.js                  every shared change as a named op; role rules; player view (also bundled into the Worker)
+  state.js                one localStorage key; mutators commit ops
+  session.js              the session socket, GM or player role
   render.js               DOM helpers, stat-block renderer, entity resolution
   panels.js               panel registry, selection model, Inspector
   layout.js               tile tree: validation, presets, rendering, gutters, editor

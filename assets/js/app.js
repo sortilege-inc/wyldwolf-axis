@@ -100,6 +100,50 @@
     buildLayoutControls();
   }
 
+  // ── session (players on their own devices) ─────────────────────────
+  const Session = window.AxisSession;
+  const sessionControls = document.getElementById('session-controls');
+
+  function buildSession() {
+    sessionControls.innerHTML = '';
+    const s = Session.current();
+    if (!s.active) {
+      const start = el('button', { class: 'btn btn-ghost' }, ['Start session']);
+      start.disabled = !window.AxisConfig.configured;
+      start.title = window.AxisConfig.configured ? 'Players join by room code' : 'Worker URL not configured (assets/js/config.js)';
+      start.addEventListener('click', async () => {
+        start.disabled = true;
+        try {
+          await Session.start();
+        } catch (e) {
+          alert(e.message);
+          start.disabled = false;
+        }
+      });
+      sessionControls.appendChild(start);
+      return;
+    }
+    const claimed = Object.keys(s.claims).length;
+    const url = Session.joinUrl();
+    const copy = el('button', { class: 'btn btn-ghost' }, ['Copy join link']);
+    copy.addEventListener('click', () => {
+      navigator.clipboard && navigator.clipboard.writeText(url).then(() => { copy.textContent = 'Copied'; setTimeout(() => (copy.textContent = 'Copy join link'), 1500); });
+    });
+    const leave = el('button', { class: 'btn btn-ghost' }, ['End session']);
+    leave.addEventListener('click', () => {
+      if (confirm('End the session? Players will be disconnected; your state stays here.')) Session.leave();
+    });
+    sessionControls.appendChild(el('div', { class: 'session-code' }, [
+      el('span', { class: 'chip' + (s.connected ? ' on' : '') }, [s.connected ? 'live' : s.status]),
+      el('b', {}, [s.info.code]),
+      el('span', { class: 'view-sub' }, [` ${claimed} claimed`]),
+    ]));
+    sessionControls.appendChild(el('div', { class: 'view-sub session-url' }, [url]));
+    sessionControls.appendChild(el('div', { class: 'chiprow' }, [copy, leave]));
+  }
+  Session.onChange(buildSession);
+  buildSession();
+
   // The table (VTT) and the player view are separate windows on the same
   // state; named targets so repeated clicks focus rather than multiply.
   const windowControls = document.getElementById('window-controls');

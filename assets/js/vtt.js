@@ -41,6 +41,25 @@
 
   if (PLAYER) document.body.classList.add('player');
 
+  // In a player's browser the play page holds the session; this window
+  // only needs to know which character is theirs to allow own-token drags.
+  function myMemberId() {
+    try {
+      const s = JSON.parse(localStorage.getItem('wyldwolf-axis-session') || 'null');
+      return s && s.role === 'player' ? s.memberId : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function canDrag(t) {
+    if (!PLAYER) return true;
+    const me = myMemberId();
+    if (!me) return false;
+    const inst = instances().find((i) => i.instanceId === t.instanceId);
+    return !!inst && window.AxisOps.ownsInstance(State.state, me, inst);
+  }
+
   const svg = document.getElementById('map');
   const stage = document.getElementById('vtt-stage');
   const toolbar = document.getElementById('vtt-toolbar');
@@ -317,7 +336,7 @@
     renderBase();
     renderEffects();
     renderTokens();
-    if (!PLAYER) syncHint();
+    syncHint();
   }
 
   function refresh() {
@@ -371,7 +390,7 @@
     closeMenu();
     const p = svgPoint(e.clientX, e.clientY);
     const t = tokenAt(e.target);
-    if (t && !PLAYER && tool === 'select') {
+    if (t && tool === 'select' && canDrag(t)) {
       const c = cell();
       selectedId = t.instanceId;
       selectedEffect = null;
@@ -442,7 +461,8 @@
       if (drag.moved) {
         drag.token.x = snap(drag.token.x, drag.token.size);
         drag.token.y = snap(drag.token.y, drag.token.size);
-        persist();
+        // a position op, not the whole map: it's what a player may send
+        State.setTokenPosition(sceneHash, drag.token.instanceId, drag.token.x, drag.token.y);
       } else {
         Bus.emit('select', { kind: 'instance', adventureId, sceneHash, instanceId: drag.token.instanceId });
       }
@@ -745,6 +765,10 @@
 
   function syncHint() {
     const n = instances().length;
+    if (PLAYER) {
+      hint.textContent = myMemberId() ? 'Drag your own tokens · wheel zooms · drag the map to pan' : '';
+      return;
+    }
     hint.textContent = n
       ? `${n} token${n === 1 ? '' : 's'} · drag to move · right-click for damage, conditions, hide · wheel zooms · Esc clears the tool`
       : 'No encounter running for this scene — hit Run Encounter in the GM window and tokens appear here.';
