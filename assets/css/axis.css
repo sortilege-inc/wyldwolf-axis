@@ -279,6 +279,47 @@ body.player .token { cursor: default; }
 .vtt-menu .row:empty { display: none; }
 .window-controls { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.9rem; }
 
+/* ── Character sheet (sheet.js) ─────────────────────────── */
+
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+.insp-btn.on { color: var(--gold); border-color: var(--gold-dim); }
+.ability-box.rollable { cursor: pointer; }
+.ability-box.rollable:hover { border-color: var(--teal-dim); }
+.hp-block { background: var(--ink-2); border: 1px solid var(--line); border-radius: 4px; padding: 0.5rem 0.7rem; margin: 0.4rem 0 0.6rem; }
+.hp-block .temp-lbl { margin-left: 0.8rem; }
+.death-saves .pips { margin: 0 0.5rem; }
+.pips { display: inline-flex; gap: 0.15rem; align-items: center; vertical-align: middle; }
+.pip-btn {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--frost-dim);
+  border-radius: 50%;
+  width: 1.35rem;
+  height: 1.35rem;
+  line-height: 1;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+}
+.pip-btn.on { color: var(--teal); border-color: var(--teal-dim); }
+.pip-btn.fail { color: var(--danger-bright); border-color: var(--danger); }
+.pip-btn:hover { border-color: var(--gold); color: var(--gold); }
+.chiprow.inline { display: inline-flex; flex-wrap: wrap; gap: 0.25rem; }
+.roll-chip { cursor: pointer; }
+.roll-chip.prof { color: var(--teal); border-color: var(--teal-dim); }
+.roll-chip:hover { border-color: var(--gold); color: var(--gold); }
+.rest-row { margin: 0.6rem 0; }
+.action-row { padding: 0.3rem 0; }
+.action-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+.action-head .fname { font-weight: 600; }
+.action-desc { margin: 0.3rem 0 0.2rem 0.4rem; color: var(--frost); font-size: 0.92rem; }
+.roll-btn { padding: 0.2rem 0.5rem; font-size: 0.8rem; }
+.equip-row .qty { font-family: var(--font-mono); font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.2rem; }
+.equip-row.gone { opacity: 0.45; }
+.companion-row { border-left: 2px solid var(--teal-dim); padding-left: 0.6rem; }
+.sheet-log { max-height: 160px; }
+.character-sheet h4 { font-size: 0.95rem; color: var(--gold-dim); margin: 0.6rem 0 0.2rem; }
+
 /* Panels inside a narrow tile: the same collapses the viewport queries
    below do, keyed on the tile's own width. */
 @container (max-width: 720px) {
@@ -613,6 +654,7 @@ textarea.notes {
   border-radius: 3px;
 }
 .hp-current-input { width: 4.5rem; }
+select.hp-current-input { width: auto; min-width: 8.5rem; }
 .conditions-input { flex: 1; min-width: 140px; }
 .hp-row .hp-current-input { font-size: 1rem; }
 

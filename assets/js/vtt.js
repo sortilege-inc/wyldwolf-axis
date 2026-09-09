@@ -37,7 +37,7 @@
     'The Ramshackle Infirmary': { image: 'assets/maps/haunted-infirmary.webp', w: 2560, h: 1440, grid: { size: 64, ox: 0, oy: 0 } },
   };
   const SIZE_CELLS = { Tiny: 1, Small: 1, Medium: 1, Large: 2, Huge: 3, Gargantuan: 4 };
-  const COLORS = { party: '#3ecfc9', npc: '#c9a86a', adversary: '#d84a52' };
+  const COLORS = { party: '#3ecfc9', companion: '#8fd9d4', npc: '#c9a86a', adversary: '#d84a52' };
 
   if (PLAYER) document.body.classList.add('player');
 
@@ -99,6 +99,10 @@
 
   function sizeFor(inst) {
     if (inst.sourceKind === 'party') return 1;
+    if (inst.sourceKind === 'companion') {
+      const c = State.companionFor(inst.defRef);
+      return (c && SIZE_CELLS[c.companion.size]) || 1;
+    }
     const found = resolveEntity(inst.defRef, data.adversaries, data.npcs);
     const s = found && found.properties && found.properties.Size;
     return SIZE_CELLS[s] || 1;

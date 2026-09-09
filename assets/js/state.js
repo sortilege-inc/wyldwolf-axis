@@ -73,10 +73,51 @@ window.AxisState = (function () {
       const raw = localStorage.getItem(KEY);
       if (!raw) return defaults();
       const parsed = JSON.parse(raw);
+      (parsed.party || []).forEach(normalizeMember);
       return Object.assign(defaults(), parsed);
     } catch (e) {
       return defaults();
     }
+  }
+
+  // ── Party member live state ─────────────────────────────────────────
+  // `gm` is the live, play-owned layer on top of the D&D Beyond snapshot:
+  // what changes at the table and survives a re-sync. Players may edit
+  // all of it except `notes` (the GM's) — see docs/PLAN-tiles-and-vtt.md.
+  function liveDefaults(snapshot) {
+    const slotsUsed = {};
+    (snapshot.spellSlots || []).forEach((s) => {
+      if (s.used) slotsUsed[s.level] = s.used;
+    });
+    const resourcesUsed = {};
+    (snapshot.resources || []).forEach((r) => {
+      if (r.used) resourcesUsed[r.key] = r.used;
+    });
+    return {
+      hpCurrent: Math.max(0, (snapshot.hpMax || 0) - (snapshot.removedHp || 0)),
+      tempHp: snapshot.tempHp || 0,
+      conditions: [],
+      notes: '',
+      playerNotes: '',
+      slotsUsed,
+      pactUsed: (snapshot.pactMagic || []).reduce((a, s) => a + (s.used || 0), 0),
+      resourcesUsed,
+      deathSaves: { success: 0, fail: 0 },
+      inspiration: !!snapshot.inspiration,
+      inventory: {}, // itemKey -> { quantity }
+      companionHp: {}, // companionKey -> hpCurrent, so a familiar's wounds persist between scenes
+    };
+  }
+
+  // Members saved before these fields existed get them filled in.
+  function normalizeMember(m) {
+    if (!m || !m.snapshot) return m;
+    const d = liveDefaults(m.snapshot);
+    m.gm = m.gm || {};
+    Object.keys(d).forEach((k) => {
+      if (m.gm[k] == null) m.gm[k] = d[k];
+    });
+    return m;
   }
 
   // Re-read localStorage IN PLACE. `state` is handed out by reference
@@ -151,11 +192,97 @@ window.AxisState = (function () {
     const member = {
       id: genId(),
       snapshot,
-      gm: { hpCurrent: snapshot.hpMax, conditions: [], notes: '' },
+      gm: liveDefaults(snapshot),
     };
     state.party.push(member);
     save();
     return member;
+  }
+
+  function member(id) {
+    return state.party.find((m) => m.id === id) || null;
+  }
+
+  // Generic live patch: hpCurrent, tempHp, deathSaves, inspiration,
+  // playerNotes, conditions — anything on the live layer by name.
+  function setPartyLive(id, patch) {
+    const m = member(id);
+    if (!m) return;
+    Object.assign(m.gm, patch);
+    save();
+  }
+
+  function setSlotUsed(id, level, used) {
+    const m = member(id);
+    if (!m) return;
+    m.gm.slotsUsed[level] = Math.max(0, used);
+    save();
+  }
+
+  function setPactUsed(id, used) {
+    const m = member(id);
+    if (!m) return;
+    m.gm.pactUsed = Math.max(0, used);
+    save();
+  }
+
+  function setResourceUsed(id, key, used) {
+    const m = member(id);
+    if (!m) return;
+    m.gm.resourcesUsed[key] = Math.max(0, used);
+    save();
+  }
+
+  function setInventoryQty(id, key, quantity) {
+    const m = member(id);
+    if (!m) return;
+    m.gm.inventory[key] = { quantity: Math.max(0, quantity) };
+    save();
+  }
+
+  // 'short': short-rest resources and pact slots. 'long': everything,
+  // plus HP to max, temp HP gone, death saves cleared.
+  function restParty(id, kind) {
+    const m = member(id);
+    if (!m) return;
+    const s = m.snapshot;
+    (s.resources || []).forEach((r) => {
+      if (kind === 'long' || r.reset === 'short') m.gm.resourcesUsed[r.key] = 0;
+    });
+    m.gm.pactUsed = 0;
+    if (kind === 'long') {
+      m.gm.slotsUsed = {};
+      m.gm.hpCurrent = s.hpMax;
+      m.gm.tempHp = 0;
+      m.gm.deathSaves = { success: 0, fail: 0 };
+    }
+    save();
+  }
+
+  // A companion / familiar / wild shape joins the encounter as its own
+  // instance, owned by the character. defRef is "<memberId>:<companionKey>".
+  function addCompanionInstance(adventureId, sceneHash, memberId, companionKey) {
+    const m = member(memberId);
+    const c = m && (m.snapshot.companions || []).find((x) => x.key === companionKey);
+    if (!c) return null;
+    const hp = m.gm.companionHp[companionKey];
+    return addCombatInstance(adventureId, sceneHash, {
+      defRef: `${memberId}:${companionKey}`,
+      sourceKind: 'companion',
+      owner: memberId,
+      displayName: c.name,
+      hpMax: c.hpMax,
+      hpCurrent: hp != null ? hp : c.hpMax,
+    });
+  }
+
+  function companionFor(defRef) {
+    const i = String(defRef).indexOf(':');
+    if (i === -1) return null;
+    const m = member(defRef.slice(0, i));
+    const key = defRef.slice(i + 1);
+    const c = m && (m.snapshot.companions || []).find((x) => x.key === key);
+    return c ? { member: m, companion: c, key } : null;
   }
 
   // Overwrites the snapshot in place (explicit re-sync action), keeps id
@@ -202,6 +329,7 @@ window.AxisState = (function () {
     // Merge by id: incoming entries overwrite existing ones with the same
     // id, new ids are appended — never silently drops the current roster.
     partyData.party.forEach((incoming) => {
+      normalizeMember(incoming);
       const idx = state.party.findIndex((m) => m.id === incoming.id);
       if (idx !== -1) state.party[idx] = incoming;
       else state.party.push(incoming);
@@ -331,8 +459,15 @@ window.AxisState = (function () {
     setCombatState(adventureId, sceneHash, combat);
     // Mirror party HP back to the party record so the Party tab (which
     // reads party[].gm.hpCurrent, not combat state) stays in sync while an
-    // encounter is running.
+    // encounter is running. Companions mirror into their owner's record.
     if (inst.sourceKind === 'party') setPartyHp(inst.defRef, hpCurrent);
+    if (inst.sourceKind === 'companion') {
+      const c = companionFor(inst.defRef);
+      if (c) {
+        c.member.gm.companionHp[c.key] = hpCurrent;
+        save();
+      }
+    }
   }
 
   function setInstanceInitiative(adventureId, sceneHash, instanceId, initiative) {
@@ -390,6 +525,8 @@ window.AxisState = (function () {
     state, save, reload, layout, setLayout, mapState, setMapState, genEffectId,
     sceneState, setSceneDone, setSceneNotes, adventureProgress,
     addPartyMember, resyncPartyMember, removePartyMember, setPartyHp, setPartyNotes, setPartyConditions,
+    member, setPartyLive, setSlotUsed, setPactUsed, setResourceUsed, setInventoryQty, restParty,
+    addCompanionInstance, companionFor,
     loadPartyFile, exportPartyFile,
     encounterOverride, setEncounterOverride, exportGmStateFile, loadGmStateFile,
     trackerPage, setTrackerPage,

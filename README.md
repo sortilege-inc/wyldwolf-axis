@@ -31,7 +31,7 @@ swap what it shows. Any panel not on screen opens in a drawer from the sidebar. 
 | **Adventure Tracker** | Progress, GM-state export/import, and the phase-grouped scene picker (Arrival / Investigation / The Ritual / Epilogue, 11 scenes). |
 | **Scene / Encounter** | The current scene: read-aloud text, checks, clues, opponents, objectives, resolutions, a done checkbox and GM notes. **Run Encounter** turns it into the combat panel: initiative, rounds and turns, per-instance HP, conditions with durations, an active-effects sidebar, attack rolls and spell text from stat blocks, and a creature search over all 335 adversaries to add more. |
 | **Inspector** | Whatever was last selected — a combatant, an opponent, a location, a party member, or any catalog entry — with live HP/conditions for combatants. |
-| **Party** | Characters imported from D&D Beyond share links (one-time snapshot, explicit re-sync), editable HP/conditions/notes, party-file export/import. |
+| **Party** | Characters imported from D&D Beyond share links (one-time snapshot, explicit re-sync) and their sheets as played: HP and temp HP, death saves, inspiration, conditions, spell slots and class resources as clickable pips, item charges and quantities, short/long rest, roll buttons for checks, saves, skills, attacks, spells (consuming a slot), and companions/familiars/wild shapes that can be summoned into the running encounter as their own combatants. Party-file export/import. |
 | **NPCs** | The named cast — profile box(es) plus a stat block where the book prints one. |
 | **Adversaries / Spells / Items / Subclasses / Artifacts / Rules Glossary** | The merged corpus, searchable; Axis content extends the SRD, Mikko extends Axis. |
 | **Lore** | The adventure's narrative and the Axis preview, verbatim, by heading. |
@@ -115,6 +115,7 @@ assets/js/
   app.js                  shell: tiles vs single-panel mode, sidebar
   tracker.js              Adventure Tracker and Scene panels
   playmode.js             Run Encounter
+  sheet.js                the character sheet as played (pips, rolls, rests, companions)
   party.js  ddb-import.js Party panel and the D&D Beyond mapper
   catalog.js  npcs.js  lore.js  dashboard.js
 data/data.js              GENERATED — window.AXIS
@@ -146,8 +147,14 @@ Nothing in the shell knows the word "Mikko". `panels.js` takes the first key of
 - **Encounter state**: once Run Encounter has seeded instances, they are the live record;
   the per-scene HP override is only the pre-encounter default. Ending an encounter
   discards instance HP/conditions/initiative and keeps party HP.
-- **D&D Beyond mapping**: AC/HP/proficiency are best-effort, not parity with D&D Beyond's
-  own calculator — situational modifiers and homebrew aren't modelled.
+- **D&D Beyond mapping**: AC/HP/proficiency/attack bonuses are best-effort, not parity
+  with D&D Beyond's own calculator — situational modifiers and homebrew aren't modelled,
+  and weapon proficiency is assumed (D&D Beyond doesn't put it on the item). Spell slots
+  come from the standard table by caster level because the API reports class-derived
+  slots as 0.
+- **Companions**: every entry in D&D Beyond's `creatures[]` (wild shapes, familiar forms,
+  beasts, summons) is offered on the sheet; the character's owner decides which to bring
+  into an encounter.
 
 ## Credit
 

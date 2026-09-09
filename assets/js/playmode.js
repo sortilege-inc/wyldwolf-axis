@@ -36,6 +36,13 @@ window.AxisPlayMode = (function () {
     return 1 + Math.floor(Math.random() * sides);
   }
 
+  let activeLog = null;
+  if (window.AxisBus) {
+    window.AxisBus.on('roll', (p) => {
+      if (activeLog && p && p.text) activeLog(p.text);
+    });
+  }
+
   // Parses a dice expression like "2d6+5" or "1d12" — the shape D&D 5e
   // damage lines are always printed in.
   function rollDiceExpr(expr) {
@@ -232,6 +239,10 @@ window.AxisPlayMode = (function () {
       logNode.innerHTML = '';
       logLines.slice(0, 16).forEach((t) => logNode.appendChild(el('div', { class: 'roll-log-line' }, [t])));
     }
+    // Rolls made on a character sheet (this window or a player's) land in
+    // this log too. One module-level subscription; the current render's
+    // log function is swapped in each time.
+    activeLog = log;
 
     if (!started) {
       const seed = seedInstancesFromScene(adventureId, scene, adversaries, npcs);
@@ -264,6 +275,11 @@ window.AxisPlayMode = (function () {
         const m = (State.state.party || []).find((mm) => mm.id === inst.defRef);
         if (!m) return null;
         return { kind: 'party', name: m.snapshot.name, dexMod: m.snapshot.abilityMods.Dexterity, properties: null, features: [], member: m };
+      }
+      if (inst.sourceKind === 'companion') {
+        const c = State.companionFor(inst.defRef);
+        if (!c) return null;
+        return { kind: 'companion', name: c.companion.name, dexMod: abilityModFromScore(c.companion.abilities.Dexterity), properties: c.companion.statblock, features: c.companion.features };
       }
       const found = resolveEntity(inst.defRef, adversaries, npcs);
       if (!found) return null;
@@ -522,7 +538,7 @@ window.AxisPlayMode = (function () {
         el('div', { class: 'combat-turn-mark' }, [isCurrent ? '▶' : '']),
         el('div', { class: 'combat-name' }, [
           nameBtn,
-          el('span', { class: 'view-sub' }, [inst.sourceKind === 'party' ? ' (party)' : inst.sourceKind === 'npc' ? ' (npc)' : ' (adversary)']),
+          el('span', { class: 'view-sub' }, [' (' + (inst.sourceKind || 'adversary') + ')']),
         ]),
         el('div', { class: 'combat-init' }, [initInput, rollInitBtn]),
         el('div', { class: 'combat-hp' }, [

@@ -32,6 +32,54 @@ reported here for audit.
 Order: layout → bus → VTT → effects. One commit each; each verified in the
 browser by the main session, not by a delegated agent's report.
 
+## Sessions (settled 2026-09-09)
+
+Players get a room-code URL, claim a character, and play from their own
+device. Needs one stateful backend: a Durable Object in the existing Worker.
+
+**Players may edit (owner):** HP, temp HP, death saves, inspiration,
+conditions, their own notes, spell slots, class resources and item charges,
+inventory quantities. **Players may not edit:** race, class, background,
+feats, ability scores, features — anything D&D Beyond decides. **Players may
+(owner):** move their own token; trigger actions, bonus actions and
+reactions for their character and for their companion / familiar / summon.
+
+Design:
+- **A. Mapper + live resources** (client only). `mapCharacter` keeps
+  activation type, attack bonus, damage dice, save DCs, `limitedUse`
+  counters, spell slots / pact magic, item charges, `creatures[]` as
+  companions, death saves, temp HP, inspiration, currencies. Live state on
+  the party member gains slot/resource usage, temp HP, death saves,
+  inspiration, player notes (separate from GM notes), inventory deltas.
+  Sheet: pips, roll buttons, short/long rest, summon companion → combat
+  instance (`sourceKind: 'companion'`, `owner: memberId`).
+- **B. Worker: `SessionRoom` Durable Object.** `POST /session` → `{ code,
+  gmToken }`; `GET /session/:code/ws?token=…` WebSocket. Doc = the shared
+  slice only (party, combat, maps). Ops carry the State function name and
+  args; the DO validates by role, applies, persists (SQLite), broadcasts.
+  Player sockets get a filtered view: no GM notes, no hidden tokens, no
+  instance notes; ops that touch those aren't forwarded. Idle sessions
+  expire by alarm after 14 days.
+- **C. Client session mode.** State mutators become named ops through one
+  `commit()`; with a session live they also go over the socket; incoming
+  ops apply without re-sending. GM: Start session → code + link. Player:
+  `play.html?s=CODE` → claim → sheet; `vtt.html?view=player&s=CODE` over
+  the socket. Rolls are bus events shown in the GM's roll log and on the
+  table.
+
+Weapon proficiency is assumed (D&D Beyond doesn't put it on the item);
+noted on the sheet as best-effort like AC.
+
+- **A landed** (2026-09-09), verified on the Druid 13 fixture through the
+  sheet's own controls: slot pip 4→3; temp HP 5 then Damage 8 → 107→104
+  with temp cleared; Produce Flame rolled attack +9 and 1d8 fire onto the
+  bus; Wild Shape spent; scimitar rolled +6 / 1d6+1; the Ape summoned into
+  the running Infirmary encounter as a companion instance with Fist/Rock
+  rollable in play mode; sheet rolls arrive in the play-mode log; long rest
+  restored HP, slots and resources. Found on the way: D&D Beyond reports
+  class-derived spell slots as `available: 0`; the mapper now falls back to
+  the standard table by caster level.
+
 ## Panel split
 
 Today's Adventure Tracker is both navigation and the scene page. It becomes:

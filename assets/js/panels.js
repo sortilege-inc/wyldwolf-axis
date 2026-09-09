@@ -110,6 +110,11 @@ window.AxisPanels = (function () {
       } else if (inst.sourceKind === 'party') {
         const m = (State.state.party || []).find((mm) => mm.id === inst.defRef);
         node = m ? partySummary(m, inst) : el('div', { class: 'inspector-empty' }, ['Party member not found.']);
+      } else if (inst.sourceKind === 'companion') {
+        const c = State.companionFor(inst.defRef);
+        node = c
+          ? el('div', {}, [el('h2', {}, [inst.displayName]), el('div', { class: 'view-sub' }, [`${c.companion.group} of ${c.member.snapshot.name}`]), liveHeader(inst), statBlock(c.companion.name, c.companion.statblock, c.companion.features)])
+          : el('div', { class: 'inspector-empty' }, ['Companion not found.']);
       } else {
         const found = resolveEntity(inst.defRef, data.adversaries, data.npcs);
         node = el('div', {}, [
