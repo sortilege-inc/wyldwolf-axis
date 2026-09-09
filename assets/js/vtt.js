@@ -67,7 +67,7 @@
 
   // ── scene / map state ──────────────────────────────────────────────
   let follow = !params.get('scene');
-  let sceneHash = params.get('scene') || gmScene();
+  let sceneHash = params.get('scene') || null; // resolved after helpers below
   let map = null;
   let tool = 'select'; // select | ping | circle | cone | line | square | reveal
   let selectedId = null; // instanceId
@@ -77,6 +77,32 @@
   function gmScene() {
     const idx = State.trackerPage(adventureId);
     return pages[idx] ? pages[idx].scene.hash : pages[0] && pages[0].scene.hash;
+  }
+
+  function hasMap(hash) {
+    const m = State.mapState(hash);
+    if (m && m.image) return true;
+    const s = adventure.scenes.find((x) => x.hash === hash);
+    return !!(s && DEFAULT_MAPS[s.name]);
+  }
+
+  // Following the GM means their scene when it has a map; otherwise the
+  // first scene that does, so the table never opens on a bare grid.
+  let followNote = '';
+  function followedScene() {
+    const h = gmScene();
+    if (hasMap(h)) {
+      followNote = '';
+      return h;
+    }
+    const mapped = pages.find((p) => hasMap(p.scene.hash));
+    if (!mapped) {
+      followNote = '';
+      return h;
+    }
+    const gmName = (adventure.scenes.find((x) => x.hash === h) || {}).name || 'the current scene';
+    followNote = `${gmName} has no map yet — showing ${mapped.scene.name}.`;
+    return mapped.scene.hash;
   }
 
   function scene() {
@@ -689,7 +715,7 @@
     followBox.checked = follow;
     followBox.addEventListener('change', () => {
       follow = followBox.checked;
-      if (follow) switchScene(gmScene(), true);
+      if (follow) switchScene(followedScene(), true);
     });
     toolbar.appendChild(el('div', { class: 'group' }, [sceneSel, el('label', {}, [followBox, 'follow GM'])]));
 
@@ -765,19 +791,23 @@
 
   function syncHint() {
     const n = instances().length;
+    const note = follow && followNote ? followNote + ' ' : '';
     if (PLAYER) {
       hint.textContent = myMemberId() ? 'Drag your own tokens · wheel zooms · drag the map to pan' : '';
       return;
     }
-    hint.textContent = n
+    hint.textContent = note + (n
       ? `${n} token${n === 1 ? '' : 's'} · drag to move · right-click for damage, conditions, hide · wheel zooms · Esc clears the tool`
-      : 'No encounter running for this scene — hit Run Encounter in the GM window and tokens appear here.';
+      : 'No encounter running for this scene — press Run encounter on it in the GM window and every combatant gets a token here.');
   }
 
   // ── bus ────────────────────────────────────────────────────────────
   Bus.on('state:changed', () => refresh());
   Bus.on('scene:changed', (p, meta) => {
-    if (meta && meta.remote && follow && p && p.adventureId === adventureId && p.sceneHash !== sceneHash) switchScene(p.sceneHash, true);
+    if (!(meta && meta.remote && follow && p && p.adventureId === adventureId)) return;
+    const next = followedScene();
+    if (next !== sceneHash) switchScene(next, true);
+    else syncHint();
   });
   Bus.on('select', (sel, meta) => {
     if (!(meta && meta.remote)) return;
@@ -790,7 +820,7 @@
 
   // ── boot ───────────────────────────────────────────────────────────
   buildLayers();
-  switchScene(sceneHash, true);
+  switchScene(sceneHash || followedScene(), true);
   window.addEventListener('resize', applyView);
 
   window.AxisVtt = { refresh, fit, map: () => map, scene: () => sceneHash, tool: () => tool };
