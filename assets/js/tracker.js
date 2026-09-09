@@ -208,12 +208,23 @@ window.AxisTracker = (function () {
     const progBar = el('div', {});
     container.appendChild(el('div', { class: 'view-header' }, [el('h1', {}, [adventure.name || 'Adventure']), progLabel]));
     container.appendChild(el('div', { class: 'progress-bar' }, [progBar]));
-    container.appendChild(gmStateFileRow());
-    if (adventure.description) container.appendChild(el('div', { html: markdownish(adventure.description) }));
+    // the blurb and themes fold away; the scene list is what the GM uses
+    const overview = el('div', { class: 'tracker-overview' });
+    overview.hidden = true;
+    if (adventure.description) overview.appendChild(el('div', { html: markdownish(adventure.description) }));
     if (adventure.themes && adventure.themes.length) {
-      container.appendChild(el('h2', {}, ['Themes']));
-      container.appendChild(el('ul', { class: 'themes-list' }, adventure.themes.map((t) => el('li', {}, [t]))));
+      overview.appendChild(el('h2', {}, ['Themes']));
+      overview.appendChild(el('ul', { class: 'themes-list' }, adventure.themes.map((t) => el('li', {}, [t]))));
     }
+    const overviewBtn = el('button', { class: 'btn btn-ghost' }, ['Overview']);
+    overviewBtn.addEventListener('click', () => {
+      overview.hidden = !overview.hidden;
+      overviewBtn.classList.toggle('active', !overview.hidden);
+    });
+    const fileRow = gmStateFileRow();
+    fileRow.appendChild(overviewBtn);
+    container.appendChild(fileRow);
+    container.appendChild(overview);
 
     // Scene list: number, name, source phase; drag a row to reorder. The
     // order is shared state so the table and players page the same way.
@@ -444,7 +455,7 @@ window.AxisTracker = (function () {
 
       const hasOpponents = !!(scene.conflict && scene.conflict.opponents && scene.conflict.opponents.length);
       const on = !!playModeOn[scene.hash];
-      const runBtn = el('button', { class: 'btn' + (on ? '' : ' btn-ghost') }, [on ? 'Back to Scene' : 'Run Encounter ▶']);
+      const runBtn = el('button', { class: 'btn' + (on ? ' btn-ghost' : '') }, [on ? 'Read scene' : 'Run encounter ▶']);
       runBtn.hidden = !hasOpponents;
       runBtn.addEventListener('click', () => {
         playModeOn[scene.hash] = !on;
@@ -453,14 +464,13 @@ window.AxisTracker = (function () {
 
       const header = el('div', { class: 'scene-header page-scene-header' }, [
         checkbox,
+        el('span', { class: 'scene-crumb' }, [`${page.phaseName.toUpperCase()} · ${idx + 1} / ${pages.length}${page.parent ? ' · under ' + ((pages.find((q) => q.scene.hash === page.parent) || {}).scene || {}).name : ''}`]),
         el('h3', {}, [scene.name]),
-        scene.type ? el('span', { class: 'view-sub' }, [scene.type]) : null,
+        scene.type ? el('span', { class: 'chip' + (/combat/i.test(scene.type) ? ' chip-combat' : '') }, [scene.type.toLowerCase()]) : null,
+        el('span', { class: 'scene-header-spacer' }),
         runBtn,
       ]);
-      const card = el('div', { class: 'scene-card page-scene-card' + (st.done ? ' done' : '') }, [
-        el('div', { class: 'view-sub' }, [`${page.phaseName} — Scene ${idx + 1} of ${pages.length}${page.parent ? ' · under ' + ((pages.find((q) => q.scene.hash === page.parent) || {}).scene || {}).name : ''}`]),
-        header,
-      ]);
+      const card = el('div', { class: 'scene-card page-scene-card' + (st.done ? ' done' : '') }, [header]);
 
       if (on && hasOpponents && window.AxisPlayMode) {
         const playWrap = el('div', { class: 'play-mode-wrap' });

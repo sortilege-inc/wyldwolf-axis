@@ -338,9 +338,20 @@ window.AxisPlayMode = (function () {
       addToggle.classList.toggle('active', !rosterEditor.hidden);
       if (!rosterEditor.hidden) searchInput.focus();
     });
-    const header = el('div', { class: 'combat-header' }, [
-      el('h2', {}, ['Run Encounter: ' + (scene.name || '')]),
-      el('div', { class: 'chiprow' }, [roundLabel, rollAllBtn, sortBtn, nextBtn, addToggle, endBtn]),
+    // whose turn it is, in the bar
+    const turnLabel = el('span', { class: 'combat-turn-label' });
+    function refreshTurnLabel() {
+      const c = State.combatState(adventureId, scene.hash);
+      const inst = c && c.instances[c.turnIndex];
+      turnLabel.innerHTML = '';
+      if (c && c.instances.length) turnLabel.appendChild(el('span', {}, [`Turn ${c.turnIndex + 1} of ${c.instances.length} · `, el('b', {}, [inst ? inst.displayName : '—'])]));
+    }
+    rollAllBtn.className = 'btn btn-ghost';
+    sortBtn.className = 'btn btn-ghost';
+    const header = el('div', { class: 'combat-bar' }, [
+      roundLabel, turnLabel,
+      el('span', { class: 'combat-bar-spacer' }),
+      nextBtn, rollAllBtn, sortBtn, addToggle, endBtn,
     ]);
 
     // ── roster editor: add a PC or search for a creature ──────────────
@@ -546,7 +557,7 @@ window.AxisPlayMode = (function () {
         if (window.AxisPanels) window.AxisPanels.select({ kind: 'instance', adventureId, sceneHash: scene.hash, instanceId: inst.instanceId });
       });
 
-      // ── the card ──────────────────────────────────────────────────────
+      // ── one line per combatant; details live in the Inspector ────────
       const hpCur = window.AxisRender.toInt(inst.hpCurrent);
       const hpMax = window.AxisRender.toInt(inst.hpMax);
       const frac = hpMax ? Math.max(0, Math.min(1, (hpCur || 0) / hpMax)) : null;
@@ -557,31 +568,28 @@ window.AxisPlayMode = (function () {
       removeBtn.className = 'btn btn-ghost cc-remove';
       removeBtn.title = 'Remove from encounter';
 
-      // condition add-row hides behind a small button
-      const condAddRow = el('div', { class: 'chiprow cc-cond-add' }, [condSelect, condDuration, condAddBtn]);
-      condAddRow.hidden = true;
-      const condToggle = el('button', { class: 'chip chip-btn', type: 'button', title: 'Add a condition' }, ['+ condition']);
-      condToggle.addEventListener('click', () => { condAddRow.hidden = !condAddRow.hidden; if (!condAddRow.hidden) condSelect.focus(); });
-
       const kind = inst.sourceKind || 'adversary';
-      const row = el('div', { class: 'combat-card kind-' + kind + (isCurrent ? ' combat-current' : '') + ' ' + hpStatusClass(inst), 'data-instance': inst.instanceId }, [
-        el('div', { class: 'cc-head' }, [
-          el('div', { class: 'cc-turn' }, [isCurrent ? '▶' : '']),
-          el('div', { class: 'cc-name' }, [nameBtn, el('span', { class: 'cc-kind' }, [kind])]),
-          el('div', { class: 'cc-init', title: 'Initiative' }, [initInput, rollInitBtn]),
-          el('div', { class: 'cc-hp' }, [
-            hpMax != null ? el('div', { class: 'cc-hp-num' }, [`${hpCur != null ? hpCur : '—'}`, el('span', { class: 'cc-hp-max' }, [` / ${hpMax}`])]) : el('div', { class: 'view-sub' }, ['no HP']),
-            hpBar,
-            el('div', { class: 'cc-hp-ctl' }, [hpMinus, hpAmount, hpPlus]),
-          ]),
-          removeBtn,
+      const selected = window.AxisPanels && window.AxisPanels.selection() && window.AxisPanels.selection().instanceId === inst.instanceId;
+      const chips = (inst.conditions || []).map((c) => el('span', { class: 'chip condition-chip' }, [c.name + (c.duration != null ? ` · ${c.duration}r` : '')]));
+      const row = el('div', { class: 'combat-card kind-' + kind + (isCurrent ? ' combat-current' : '') + (selected ? ' combat-selected' : '') + ' ' + hpStatusClass(inst), 'data-instance': inst.instanceId }, [
+        el('div', { class: 'cc-turn' }, [isCurrent ? '▶' : '']),
+        el('div', { class: 'cc-name' }, [
+          el('div', { class: 'cc-name-line' }, [nameBtn, el('span', { class: 'cc-kind' }, [kind])]),
+          chips.length ? el('div', { class: 'chiprow cc-conds' }, chips) : null,
         ]),
-        el('div', { class: 'cc-body' }, [
-          actionButtons.length || spellButtons.length ? el('div', { class: 'chiprow cc-actions' }, [...actionButtons, ...spellButtons]) : null,
-          el('div', { class: 'chiprow cc-conds' }, [...condChips, condToggle]),
-          condAddRow,
+        el('div', { class: 'cc-init', title: 'Initiative' }, [initInput, rollInitBtn]),
+        el('div', { class: 'cc-hp' }, [
+          hpMax != null ? el('div', { class: 'cc-hp-num' }, [`${hpCur != null ? hpCur : '—'}`, el('span', { class: 'cc-hp-max' }, [` / ${hpMax}`])]) : el('div', { class: 'view-sub' }, ['no HP']),
+          hpBar,
         ]),
+        el('div', { class: 'cc-hp-ctl' }, [hpMinus, hpAmount, hpPlus]),
+        removeBtn,
       ]);
+      // the whole line selects, not just the name
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('button, input, select')) return;
+        nameBtn.click();
+      });
       return row;
     }
 
@@ -613,7 +621,9 @@ window.AxisPlayMode = (function () {
       else rows.forEach((r) => sidebar.appendChild(r));
     }
 
-    const bodyLayout = el('div', { class: 'combat-body-layout' }, [tableWrap, sidebar]);
+    // conditions show on each line and in the Inspector; the separate
+    // effects sidebar is gone
+    const bodyLayout = el('div', { class: 'combat-body' }, [tableWrap]);
 
     function renderPicker() {}
 
@@ -629,17 +639,33 @@ window.AxisPlayMode = (function () {
         addPcSelect.appendChild(el('option', { value: m.id }, [m.snapshot.name]));
       });
       renderTable();
-      renderSidebar();
+      refreshTurnLabel();
     }
 
     renderAll();
     rosterEditor.hidden = true;
 
     container.appendChild(header);
-    container.appendChild(rosterEditor);
     container.appendChild(bodyLayout);
-    container.appendChild(el('h3', {}, ['Roll Log']));
+    container.appendChild(rosterEditor);
+    container.appendChild(el('div', { class: 'roll-log-head' }, [el('h3', {}, ['Roll log'])]));
     container.appendChild(logNode);
+    // a selection elsewhere (the table, the Inspector) highlights the line;
+    // a change elsewhere (the Inspector's HP or conditions) redraws the
+    // lines — unless the GM is typing in one of them
+    if (window.AxisBus) {
+      const offSel = window.AxisBus.on('select', () => { if (container.isConnected) renderTable(); else offSel(); });
+      const offChg = window.AxisBus.on('state:changed', () => {
+        if (!container.isConnected) { offChg(); return; }
+        if (tableWrap.contains(document.activeElement)) return;
+        const c = State.combatState(adventureId, scene.hash);
+        if (!c) return;
+        combat = c;
+        renderTable();
+        refreshTurnLabel();
+        roundLabel.textContent = `Round ${combat.round}`;
+      });
+    }
   }
 
   return { render, parseRollableActions, rollDiceExpr, adversaryDexMod, extractSpellRefs, CONDITION_NAMES };

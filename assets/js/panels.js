@@ -101,6 +101,9 @@ window.AxisPanels = (function () {
       container.appendChild(el('div', { class: 'inspector-empty' }, ['Nothing selected. Click a combatant, an opponent, a location, or any catalog entry.']));
       return;
     }
+    // combatants, party members, opponents and creatures get the banner +
+    // tabs view; everything else falls through to the plain renderers
+    if (window.AxisInspector && window.AxisInspector.render(container, sel, () => renderSelection(container, sel))) return;
     let node = null;
     if (sel.kind === 'instance') {
       const combat = State.combatState(sel.adventureId, sel.sceneHash);
