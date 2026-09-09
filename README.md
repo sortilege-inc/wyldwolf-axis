@@ -21,7 +21,8 @@ then open `http://localhost:8934/`.
 
 At 900px and wider the main area is a **tile layout**: rows or columns of panels, nested
 one level, at most three per group, resizable by dragging the gutters. The default is
-three columns — Adventure Tracker · Scene / Encounter · (Inspector over Rules Glossary).
+three columns at 20 / 50 / 30 — Adventure Tracker · Scene / Encounter · (Inspector over
+Rules Glossary).
 The sidebar switches presets and opens a tree editor; each tile's header has a picker to
 swap what it shows. The ☰ button collapses the sidebar (remembered per browser). Any panel not on screen opens in a drawer from the sidebar. Below
 900px it falls back to one panel at a time.
