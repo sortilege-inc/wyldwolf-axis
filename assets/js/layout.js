@@ -75,24 +75,57 @@ window.AxisLayout = (function () {
     mounts = [];
   }
 
+  const RAIL = '28px';
+
+  // A collapsed root column (or row) takes a slim rail instead of its
+  // share; `collapsed[i]` lives on the root node and persists with it.
+  function isCollapsed(node, i) {
+    return !!(node === tree && node.collapsed && node.collapsed[i]);
+  }
+
   function template(node) {
     const n = node.children.length;
     const w = node.weights && node.weights.length === n ? node.weights : node.children.map(() => 1);
     // child, gutter, child, gutter, child
-    return w.map((x) => `minmax(0, ${x}fr)`).join(' 6px ');
+    return w.map((x, i) => (isCollapsed(node, i) ? RAIL : `minmax(0, ${x}fr)`)).join(' 6px ');
   }
 
-  function buildGroup(node, path) {
+  function setCollapsed(i, on) {
+    if (!tree.collapsed) tree.collapsed = tree.children.map(() => false);
+    // never collapse the last open one
+    if (on && tree.children.every((c, j) => j === i || tree.collapsed[j])) return;
+    tree.collapsed[i] = on;
+    State.setLayout(tree);
+    render(rootEl);
+  }
+
+  function labelOf(node) {
+    if (isGroup(node)) return node.children.map(labelOf).join(' · ');
+    return Panels.PANELS[node] ? Panels.PANELS[node].label : node;
+  }
+
+  function buildRail(child, i) {
+    const rail = el('div', { class: 'tile-rail', title: 'Open ' + labelOf(child) }, [
+      el('button', { class: 'tile-collapse', type: 'button', 'aria-label': 'Open column' }, [tree.dir === 'row' ? '▸' : '▾']),
+      el('span', { class: 'tile-rail-label' }, [labelOf(child)]),
+    ]);
+    rail.addEventListener('click', () => setCollapsed(i, false));
+    return rail;
+  }
+
+  function buildGroup(node, path, rootIndex) {
     const g = el('div', { class: 'tile-group dir-' + node.dir });
     g.style[node.dir === 'row' ? 'gridTemplateColumns' : 'gridTemplateRows'] = template(node);
     node.children.forEach((child, i) => {
       if (i > 0) g.appendChild(buildGutter(node, i - 1, g));
-      g.appendChild(isGroup(child) ? buildGroup(child, path.concat(i)) : buildTile(child, node, i));
+      const ri = node === tree ? i : rootIndex;
+      if (isCollapsed(node, i)) g.appendChild(buildRail(child, i));
+      else g.appendChild(isGroup(child) ? buildGroup(child, path.concat(i), ri) : buildTile(child, node, i, ri));
     });
     return g;
   }
 
-  function buildTile(id, parent, index) {
+  function buildTile(id, parent, index, rootIndex) {
     const body = el('div', { class: 'tile-body' });
     const picker = el('select', { class: 'tile-picker', title: 'Change this tile' });
     Panels.list().forEach((p) => {
@@ -105,8 +138,12 @@ window.AxisLayout = (function () {
       State.setLayout(tree);
       render(rootEl);
     });
+    // collapses the whole root column/row this tile belongs to
+    const collapse = el('button', { class: 'tile-collapse', type: 'button', title: 'Collapse this column' }, [tree.dir === 'row' ? '◂' : '▴']);
+    collapse.hidden = rootIndex == null || tree.children.length < 2;
+    collapse.addEventListener('click', () => setCollapsed(rootIndex, true));
     const tile = el('div', { class: 'tile', 'data-panel': id }, [
-      el('div', { class: 'tile-head' }, [el('span', {}, [Panels.PANELS[id] ? Panels.PANELS[id].label : id]), picker]),
+      el('div', { class: 'tile-head' }, [el('span', {}, [Panels.PANELS[id] ? Panels.PANELS[id].label : id]), picker, collapse]),
       body,
     ]);
     const ctx = Panels.makeCtx();
@@ -156,7 +193,7 @@ window.AxisLayout = (function () {
     tree = currentTree();
     root.innerHTML = '';
     root.classList.add('tiles-mode');
-    root.appendChild(buildGroup(tree, []));
+    root.appendChild(buildGroup(tree, [], null));
   }
 
   // Bring a panel to the GM's attention: flash it if it's on screen,
@@ -296,5 +333,5 @@ window.AxisLayout = (function () {
     const overlay = drawer(body);
   }
 
-  return { PRESETS, DEFAULT_PRESET, validate, render, open, applyPreset, editor, mounted, teardown, currentTree };
+  return { PRESETS, DEFAULT_PRESET, validate, render, open, applyPreset, editor, mounted, teardown, currentTree, setCollapsed };
 })();

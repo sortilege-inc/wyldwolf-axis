@@ -356,6 +356,44 @@ main.view.tiles-mode {
   padding: 1rem 1.2rem 2rem;
 }
 .tile .view-header h1 { font-size: 1.45rem; }
+.tile-collapse {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--frost-dim);
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.tile-collapse:hover { color: var(--teal); border-color: var(--teal-dim); }
+.tile-head .tile-collapse { margin-left: 0.2rem; }
+.tile-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.tile-rail:hover { background: var(--ink-3); }
+.tile-rail-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.dir-col > .tile-rail { flex-direction: row; padding: 0 0.5rem; }
+.dir-col > .tile-rail .tile-rail-label { writing-mode: horizontal-tb; transform: none; }
 .tile-gutter { background: var(--line); }
 .dir-row > .tile-gutter { cursor: col-resize; }
 .dir-col > .tile-gutter { cursor: row-resize; }
